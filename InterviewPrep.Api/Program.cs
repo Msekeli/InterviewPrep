@@ -1,6 +1,7 @@
 using InterviewPrep.Application.Interfaces;
 using InterviewPrep.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using InterviewPrep.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IInterviewSessionRepository, InterviewSessionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IQuestionService, OpenAiQuestionService>();
 
 var app = builder.Build();
 

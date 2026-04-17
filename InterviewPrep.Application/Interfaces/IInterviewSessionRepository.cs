@@ -8,4 +8,6 @@ public interface IInterviewSessionRepository
     Task<InterviewSession?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<InterviewSession>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task UpdateAsync(InterviewSession session, CancellationToken cancellationToken = default);
+    Task AddQuestionsAsync(IReadOnlyList<InterviewQuestion> questions, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<InterviewQuestion>> GetQuestionsBySessionIdAsync(Guid sessionId, CancellationToken cancellationToken = default);
 }

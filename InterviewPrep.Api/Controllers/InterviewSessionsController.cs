@@ -42,4 +42,55 @@ public class InterviewSessionsController : ControllerBase
             session.CreatedAtUtc
         });
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetSessions(CancellationToken cancellationToken)
+    {
+        var temporaryUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+
+        var sessions = await _interviewSessionRepository.GetByUserIdAsync(temporaryUserId, cancellationToken);
+
+        var response = sessions.Select(session => new InterviewSessionDto
+        {
+            Id = session.Id,
+            CvText = session.CvText,
+            JobSpecText = session.JobSpecText,
+            CompanyText = session.CompanyText,
+            TargetLevel = session.TargetLevel,
+            Status = session.Status,
+            CreatedAtUtc = session.CreatedAtUtc,
+            CompletedAtUtc = session.CompletedAtUtc,
+            OverallScore = session.OverallScore,
+            Feedback = session.Feedback
+        });
+
+        return Ok(response);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetSessionById(Guid id, CancellationToken cancellationToken)
+    {
+        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+
+        if (session is null)
+        {
+            return NotFound();
+        }
+
+        var response = new InterviewSessionDto
+        {
+            Id = session.Id,
+            CvText = session.CvText,
+            JobSpecText = session.JobSpecText,
+            CompanyText = session.CompanyText,
+            TargetLevel = session.TargetLevel,
+            Status = session.Status,
+            CreatedAtUtc = session.CreatedAtUtc,
+            CompletedAtUtc = session.CompletedAtUtc,
+            OverallScore = session.OverallScore,
+            Feedback = session.Feedback
+        };
+
+        return Ok(response);
+    }
 }

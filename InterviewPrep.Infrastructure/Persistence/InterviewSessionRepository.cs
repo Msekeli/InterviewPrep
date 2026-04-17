@@ -38,4 +38,18 @@ public class InterviewSessionRepository : IInterviewSessionRepository
         _dbContext.InterviewSessions.Update(session);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task AddQuestionsAsync(IReadOnlyList<InterviewQuestion> questions, CancellationToken cancellationToken = default)
+    {
+        await _dbContext.InterviewQuestions.AddRangeAsync(questions, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<InterviewQuestion>> GetQuestionsBySessionIdAsync(Guid sessionId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.InterviewQuestions
+            .Where(x => x.InterviewSessionId == sessionId)
+            .OrderBy(x => x.Order)
+            .ToListAsync(cancellationToken);
+    }
 }
