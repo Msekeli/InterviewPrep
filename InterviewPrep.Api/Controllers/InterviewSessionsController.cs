@@ -1,7 +1,7 @@
 using InterviewPrep.Application.DTOs;
-using InterviewPrep.Application.Interfaces;
-using InterviewPrep.Domain.Entities;
-using InterviewPrep.Domain.Enums;
+using InterviewPrep.Application.Features.Questions;
+using InterviewPrep.Application.Features.Results;
+using InterviewPrep.Application.Features.Sessions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InterviewPrep.Api.Controllers;
@@ -10,215 +10,118 @@ namespace InterviewPrep.Api.Controllers;
 [Route("api/sessions")]
 public class InterviewSessionsController : ControllerBase
 {
-    private static readonly Guid TemporaryUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
-    private readonly IInterviewSessionRepository _interviewSessionRepository;
-    private readonly IQuestionService _questionService;
+    private readonly CreateSessionHandler _createSessionHandler;
+    private readonly GetSessionsHandler _getSessionsHandler;
+    private readonly GetSessionByIdHandler _getSessionByIdHandler;
+    private readonly GenerateQuestionsHandler _generateQuestionsHandler;
+    private readonly GetQuestionsHandler _getQuestionsHandler;
+    private readonly SubmitAnswerHandler _submitAnswerHandler;
+    private readonly GetAnswersHandler _getAnswersHandler;
 
     public InterviewSessionsController(
-        IInterviewSessionRepository interviewSessionRepository,
-        IQuestionService questionService)
+        CreateSessionHandler createSessionHandler,
+        GetSessionsHandler getSessionsHandler,
+        GetSessionByIdHandler getSessionByIdHandler,
+        GenerateQuestionsHandler generateQuestionsHandler,
+        GetQuestionsHandler getQuestionsHandler,
+        SubmitAnswerHandler submitAnswerHandler,
+        GetAnswersHandler getAnswersHandler)
     {
-        _interviewSessionRepository = interviewSessionRepository;
-        _questionService = questionService;
+        _createSessionHandler = createSessionHandler;
+        _getSessionsHandler = getSessionsHandler;
+        _getSessionByIdHandler = getSessionByIdHandler;
+        _generateQuestionsHandler = generateQuestionsHandler;
+        _getQuestionsHandler = getQuestionsHandler;
+        _submitAnswerHandler = submitAnswerHandler;
+        _getAnswersHandler = getAnswersHandler;
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateSession([FromBody] CreateSessionRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateSession(
+        [FromBody] CreateSessionRequest request,
+        CancellationToken cancellationToken)
     {
-        var session = new InterviewSession
-        {
-            Id = Guid.NewGuid(),
-            UserId = TemporaryUserId,
-            CvText = request.CvText,
-            JobSpecText = request.JobSpecText,
-            CompanyText = request.CompanyText,
-            TargetLevel = request.TargetLevel,
-            Status = InterviewSessionStatus.Draft,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
-        };
-
-        await _interviewSessionRepository.AddAsync(session, cancellationToken);
-
-        return Ok(new
-        {
-            session.Id,
-            session.Status,
-            session.CreatedAtUtc
-        });
+        var result = await _createSessionHandler.HandleAsync(request, cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetSessions(CancellationToken cancellationToken)
     {
-        var sessions = await _interviewSessionRepository.GetByUserIdAsync(TemporaryUserId, cancellationToken);
-
-        var response = sessions.Select(session => new InterviewSessionDto
-        {
-            Id = session.Id,
-            CvText = session.CvText,
-            JobSpecText = session.JobSpecText,
-            CompanyText = session.CompanyText,
-            TargetLevel = session.TargetLevel,
-            Status = session.Status,
-            CreatedAtUtc = session.CreatedAtUtc,
-            CompletedAtUtc = session.CompletedAtUtc,
-            OverallScore = session.OverallScore,
-            Feedback = session.Feedback
-        });
-
-        return Ok(response);
+        var result = await _getSessionsHandler.HandleAsync(cancellationToken);
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetSessionById(Guid id, CancellationToken cancellationToken)
     {
-        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+        var result = await _getSessionByIdHandler.HandleAsync(id, cancellationToken);
 
-        if (session is null)
+        if (result is null)
         {
             return NotFound();
         }
 
-        return Ok(new InterviewSessionDto
-        {
-            Id = session.Id,
-            CvText = session.CvText,
-            JobSpecText = session.JobSpecText,
-            CompanyText = session.CompanyText,
-            TargetLevel = session.TargetLevel,
-            Status = session.Status,
-            CreatedAtUtc = session.CreatedAtUtc,
-            CompletedAtUtc = session.CompletedAtUtc,
-            OverallScore = session.OverallScore,
-            Feedback = session.Feedback
-        });
+        return Ok(result);
     }
 
     [HttpPost("{id:guid}/questions")]
     public async Task<IActionResult> GenerateQuestions(Guid id, CancellationToken cancellationToken)
     {
-        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+        var result = await _generateQuestionsHandler.HandleAsync(id, cancellationToken);
 
-        if (session is null)
+        if (result is null)
         {
             return NotFound();
         }
 
-        var existingQuestions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(id, cancellationToken);
-
-        if (existingQuestions.Count > 0)
-        {
-            return Ok(existingQuestions.Select(question => new
-            {
-                question.Id,
-                question.Category,
-                question.Text,
-                question.Order
-            }));
-        }
-
-        var questions = await _questionService.GenerateQuestionsAsync(session, cancellationToken);
-
-        await _interviewSessionRepository.AddQuestionsAsync(questions, cancellationToken);
-
-        return Ok(questions.Select(question => new
-        {
-            question.Id,
-            question.Category,
-            question.Text,
-            question.Order
-        }));
+        return Ok(result);
     }
 
     [HttpGet("{id:guid}/questions")]
     public async Task<IActionResult> GetQuestions(Guid id, CancellationToken cancellationToken)
     {
-        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+        var result = await _getQuestionsHandler.HandleAsync(id, cancellationToken);
 
-        if (session is null)
+        if (result is null)
         {
             return NotFound();
         }
 
-        var questions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(id, cancellationToken);
-
-        return Ok(questions.Select(question => new
-        {
-            question.Id,
-            question.Category,
-            question.Text,
-            question.Order
-        }));
+        return Ok(result);
     }
 
     [HttpPost("{id:guid}/answers")]
-public async Task<IActionResult> SubmitAnswer(
-    Guid id,
-    [FromBody] SubmitAnswerRequest request,
-    CancellationToken cancellationToken)
-{
-    var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
-
-    if (session is null)
+    public async Task<IActionResult> SubmitAnswer(
+        Guid id,
+        [FromBody] SubmitAnswerRequest request,
+        CancellationToken cancellationToken)
     {
-        return NotFound("Session not found.");
+        var result = await _submitAnswerHandler.HandleAsync(id, request, cancellationToken);
+
+        if (result.SessionNotFound)
+        {
+            return NotFound(result.ErrorMessage);
+        }
+
+        if (result.InvalidQuestion)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+
+        return Ok(result.Answer);
     }
-
-    var questions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(id, cancellationToken);
-    var questionExists = questions.Any(x => x.Id == request.InterviewQuestionId);
-
-    if (!questionExists)
-    {
-        return BadRequest("Question does not belong to this session.");
-    }
-
-    var answer = new InterviewAnswer
-    {
-        Id = Guid.NewGuid(),
-        InterviewSessionId = id,
-        InterviewQuestionId = request.InterviewQuestionId,
-        Transcript = request.Transcript,
-        Score = null
-    };
-
-    await _interviewSessionRepository.AddAnswerAsync(answer, cancellationToken);
-
-    if (session.Status == InterviewSessionStatus.Draft)
-    {
-        session.Status = InterviewSessionStatus.InProgress;
-        await _interviewSessionRepository.UpdateAsync(session, cancellationToken);
-    }
-
-    return Ok(new
-    {
-        answer.Id,
-        answer.InterviewSessionId,
-        answer.InterviewQuestionId,
-        answer.Transcript
-    });
-}
 
     [HttpGet("{id:guid}/answers")]
     public async Task<IActionResult> GetAnswers(Guid id, CancellationToken cancellationToken)
     {
-        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+        var result = await _getAnswersHandler.HandleAsync(id, cancellationToken);
 
-        if (session is null)
+        if (result is null)
         {
             return NotFound();
         }
 
-        var answers = await _interviewSessionRepository.GetAnswersBySessionIdAsync(id, cancellationToken);
-
-        return Ok(answers.Select(answer => new
-        {
-            answer.Id,
-            answer.InterviewSessionId,
-            answer.InterviewQuestionId,
-            answer.Transcript,
-            answer.Score
-        }));
+        return Ok(result);
     }
 }

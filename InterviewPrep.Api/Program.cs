@@ -2,12 +2,25 @@ using InterviewPrep.Application.Interfaces;
 using InterviewPrep.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using InterviewPrep.Infrastructure.Services;
+using InterviewPrep.Application.Features.Questions;
+using InterviewPrep.Application.Features.Results;
+using InterviewPrep.Application.Features.Sessions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<CreateSessionHandler>();
+builder.Services.AddScoped<GetSessionsHandler>();
+builder.Services.AddScoped<GetSessionByIdHandler>();
+
+builder.Services.AddScoped<GenerateQuestionsHandler>();
+builder.Services.AddScoped<GetQuestionsHandler>();
+
+builder.Services.AddScoped<SubmitAnswerHandler>();
+builder.Services.AddScoped<GetAnswersHandler>();
 
 var home = Environment.GetEnvironmentVariable("HOME");
 var dataFolder = Path.Combine(home ?? builder.Environment.ContentRootPath, "Data");
