@@ -35,11 +35,23 @@ builder.Services.AddScoped<CompleteSessionHandler>();
 // On Azure, HOME is available, so this keeps the database in a writable location.
 // Locally, it falls back to the app content root.
 //
-var home = Environment.GetEnvironmentVariable("HOME");
-var dataFolder = Path.Combine(home ?? builder.Environment.ContentRootPath, "Data");
-Directory.CreateDirectory(dataFolder);
+var dbPath = builder.Configuration["SQLITE_DB_PATH"];
 
-var dbPath = Path.Combine(dataFolder, "interviewprep.db");
+if (string.IsNullOrWhiteSpace(dbPath))
+{
+    var home = Environment.GetEnvironmentVariable("HOME");
+    var dataFolder = Path.Combine(home ?? builder.Environment.ContentRootPath, "Data");
+    Directory.CreateDirectory(dataFolder);
+    dbPath = Path.Combine(dataFolder, "interviewprep.db");
+}
+else
+{
+    var directory = Path.GetDirectoryName(dbPath);
+    if (!string.IsNullOrWhiteSpace(directory))
+    {
+        Directory.CreateDirectory(directory);
+    }
+}
 
 //
 // Register EF Core with SQLite
