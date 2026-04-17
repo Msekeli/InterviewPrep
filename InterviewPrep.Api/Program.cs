@@ -77,7 +77,7 @@ var app = builder.Build();
 //
 // Enable OpenAPI / Swagger in development only
 //
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.MapOpenApi();
 
@@ -87,7 +87,6 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger";
     });
 }
-
 //
 // Middleware pipeline
 //
