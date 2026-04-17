@@ -40,7 +40,12 @@ public class GenerateQuestionsHandler
                 .ToList();
         }
 
-        var questions = await _questionService.GenerateQuestionsAsync(session, cancellationToken);
+       var questions = await _questionService.GenerateQuestionsAsync(session, cancellationToken);
+
+        foreach (var question in questions)
+        {
+            question.InterviewSessionId = sessionId;
+        }
 
         await _interviewSessionRepository.AddQuestionsAsync(questions, cancellationToken);
 
