@@ -52,4 +52,17 @@ public class InterviewSessionRepository : IInterviewSessionRepository
             .OrderBy(x => x.Order)
             .ToListAsync(cancellationToken);
     }
+    public async Task AddAnswerAsync(InterviewAnswer answer, CancellationToken cancellationToken = default)
+{
+    await _dbContext.InterviewAnswers.AddAsync(answer, cancellationToken);
+    await _dbContext.SaveChangesAsync(cancellationToken);
+}
+
+public async Task<IReadOnlyList<InterviewAnswer>> GetAnswersBySessionIdAsync(Guid sessionId, CancellationToken cancellationToken = default)
+{
+    return await _dbContext.InterviewAnswers
+        .Where(x => x.InterviewSessionId == sessionId)
+        .OrderBy(x => x.Id)
+        .ToListAsync(cancellationToken);
+}
 }

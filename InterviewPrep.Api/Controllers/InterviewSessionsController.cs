@@ -152,4 +152,73 @@ public class InterviewSessionsController : ControllerBase
             question.Order
         }));
     }
+
+    [HttpPost("{id:guid}/answers")]
+public async Task<IActionResult> SubmitAnswer(
+    Guid id,
+    [FromBody] SubmitAnswerRequest request,
+    CancellationToken cancellationToken)
+{
+    var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+
+    if (session is null)
+    {
+        return NotFound("Session not found.");
+    }
+
+    var questions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(id, cancellationToken);
+    var questionExists = questions.Any(x => x.Id == request.InterviewQuestionId);
+
+    if (!questionExists)
+    {
+        return BadRequest("Question does not belong to this session.");
+    }
+
+    var answer = new InterviewAnswer
+    {
+        Id = Guid.NewGuid(),
+        InterviewSessionId = id,
+        InterviewQuestionId = request.InterviewQuestionId,
+        Transcript = request.Transcript,
+        Score = null
+    };
+
+    await _interviewSessionRepository.AddAnswerAsync(answer, cancellationToken);
+
+    if (session.Status == InterviewSessionStatus.Draft)
+    {
+        session.Status = InterviewSessionStatus.InProgress;
+        await _interviewSessionRepository.UpdateAsync(session, cancellationToken);
+    }
+
+    return Ok(new
+    {
+        answer.Id,
+        answer.InterviewSessionId,
+        answer.InterviewQuestionId,
+        answer.Transcript
+    });
+}
+
+    [HttpGet("{id:guid}/answers")]
+    public async Task<IActionResult> GetAnswers(Guid id, CancellationToken cancellationToken)
+    {
+        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+
+        if (session is null)
+        {
+            return NotFound();
+        }
+
+        var answers = await _interviewSessionRepository.GetAnswersBySessionIdAsync(id, cancellationToken);
+
+        return Ok(answers.Select(answer => new
+        {
+            answer.Id,
+            answer.InterviewSessionId,
+            answer.InterviewQuestionId,
+            answer.Transcript,
+            answer.Score
+        }));
+    }
 }
