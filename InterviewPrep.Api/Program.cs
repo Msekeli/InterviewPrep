@@ -11,6 +11,7 @@ builder.Services.AddOpenApi();
 var home = Environment.GetEnvironmentVariable("HOME");
 var dataFolder = Path.Combine(home ?? builder.Environment.ContentRootPath, "Data");
 Directory.CreateDirectory(dataFolder);
+
 var dbPath = Path.Combine(dataFolder, "interviewprep.db");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -31,8 +32,13 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.Migrate();
+}
 
 app.Run();
