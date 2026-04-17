@@ -10,11 +10,17 @@ namespace InterviewPrep.Api.Controllers;
 [Route("api/sessions")]
 public class InterviewSessionsController : ControllerBase
 {
-    private readonly IInterviewSessionRepository _interviewSessionRepository;
+    private static readonly Guid TemporaryUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
-    public InterviewSessionsController(IInterviewSessionRepository interviewSessionRepository)
+    private readonly IInterviewSessionRepository _interviewSessionRepository;
+    private readonly IQuestionService _questionService;
+
+    public InterviewSessionsController(
+        IInterviewSessionRepository interviewSessionRepository,
+        IQuestionService questionService)
     {
         _interviewSessionRepository = interviewSessionRepository;
+        _questionService = questionService;
     }
 
     [HttpPost]
@@ -23,7 +29,7 @@ public class InterviewSessionsController : ControllerBase
         var session = new InterviewSession
         {
             Id = Guid.NewGuid(),
-            UserId = Guid.NewGuid(), // temporary until auth is added
+            UserId = TemporaryUserId,
             CvText = request.CvText,
             JobSpecText = request.JobSpecText,
             CompanyText = request.CompanyText,
@@ -46,9 +52,7 @@ public class InterviewSessionsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetSessions(CancellationToken cancellationToken)
     {
-        var temporaryUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
-        var sessions = await _interviewSessionRepository.GetByUserIdAsync(temporaryUserId, cancellationToken);
+        var sessions = await _interviewSessionRepository.GetByUserIdAsync(TemporaryUserId, cancellationToken);
 
         var response = sessions.Select(session => new InterviewSessionDto
         {
@@ -77,7 +81,7 @@ public class InterviewSessionsController : ControllerBase
             return NotFound();
         }
 
-        var response = new InterviewSessionDto
+        return Ok(new InterviewSessionDto
         {
             Id = session.Id,
             CvText = session.CvText,
@@ -89,8 +93,63 @@ public class InterviewSessionsController : ControllerBase
             CompletedAtUtc = session.CompletedAtUtc,
             OverallScore = session.OverallScore,
             Feedback = session.Feedback
-        };
+        });
+    }
 
-        return Ok(response);
+    [HttpPost("{id:guid}/questions")]
+    public async Task<IActionResult> GenerateQuestions(Guid id, CancellationToken cancellationToken)
+    {
+        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+
+        if (session is null)
+        {
+            return NotFound();
+        }
+
+        var existingQuestions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(id, cancellationToken);
+
+        if (existingQuestions.Count > 0)
+        {
+            return Ok(existingQuestions.Select(question => new
+            {
+                question.Id,
+                question.Category,
+                question.Text,
+                question.Order
+            }));
+        }
+
+        var questions = await _questionService.GenerateQuestionsAsync(session, cancellationToken);
+
+        await _interviewSessionRepository.AddQuestionsAsync(questions, cancellationToken);
+
+        return Ok(questions.Select(question => new
+        {
+            question.Id,
+            question.Category,
+            question.Text,
+            question.Order
+        }));
+    }
+
+    [HttpGet("{id:guid}/questions")]
+    public async Task<IActionResult> GetQuestions(Guid id, CancellationToken cancellationToken)
+    {
+        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
+
+        if (session is null)
+        {
+            return NotFound();
+        }
+
+        var questions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(id, cancellationToken);
+
+        return Ok(questions.Select(question => new
+        {
+            question.Id,
+            question.Category,
+            question.Text,
+            question.Order
+        }));
     }
 }
