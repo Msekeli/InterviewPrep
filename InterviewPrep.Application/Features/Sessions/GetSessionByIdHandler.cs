@@ -3,23 +3,27 @@ using InterviewPrep.Application.Interfaces;
 
 namespace InterviewPrep.Application.Features.Sessions;
 
-public class GetSessionsHandler
+public class GetSessionByIdHandler
 {
-    private static readonly Guid TemporaryUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
     private readonly IInterviewSessionRepository _interviewSessionRepository;
 
-    public GetSessionsHandler(IInterviewSessionRepository interviewSessionRepository)
+    public GetSessionByIdHandler(IInterviewSessionRepository interviewSessionRepository)
     {
         _interviewSessionRepository = interviewSessionRepository;
     }
 
-    public async Task<IReadOnlyList<InterviewSessionDto>> HandleAsync(
+    public async Task<InterviewSessionDto?> HandleAsync(
+        Guid id,
         CancellationToken cancellationToken = default)
     {
-        var sessions = await _interviewSessionRepository.GetByUserIdAsync(TemporaryUserId, cancellationToken);
+        var session = await _interviewSessionRepository.GetByIdAsync(id, cancellationToken);
 
-        return sessions.Select(session => new InterviewSessionDto
+        if (session is null)
+        {
+            return null;
+        }
+
+        return new InterviewSessionDto
         {
             Id = session.Id,
             CvText = session.CvText,
@@ -31,6 +35,6 @@ public class GetSessionsHandler
             CompletedAtUtc = session.CompletedAtUtc,
             OverallScore = session.OverallScore,
             Feedback = session.Feedback
-        }).ToList();
+        };
     }
 }
