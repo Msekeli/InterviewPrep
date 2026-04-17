@@ -50,9 +50,10 @@ builder.Services.AddScoped<IInterviewEvaluatorService, MockInterviewEvaluatorSer
 var app = builder.Build();
 
 app.UseSwagger();
+
 app.UseSwaggerUI(options =>
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "InterviewPrep API v1");
+    options.SwaggerEndpoint("./v1/swagger.json", "InterviewPrep API v1");
     options.RoutePrefix = "swagger";
 });
 
