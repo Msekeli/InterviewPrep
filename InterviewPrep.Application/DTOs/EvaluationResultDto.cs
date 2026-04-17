@@ -1,9 +1,7 @@
 namespace InterviewPrep.Application.DTOs;
 
-public class InterviewResultDto
+public class EvaluationResultDto
 {
-    public Guid SessionId { get; set; }
     public decimal OverallScore { get; set; }
     public string Feedback { get; set; } = string.Empty;
-    public DateTime CompletedAtUtc { get; set; }
 }

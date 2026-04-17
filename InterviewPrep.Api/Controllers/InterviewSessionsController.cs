@@ -17,6 +17,7 @@ public class InterviewSessionsController : ControllerBase
     private readonly GetQuestionsHandler _getQuestionsHandler;
     private readonly SubmitAnswerHandler _submitAnswerHandler;
     private readonly GetAnswersHandler _getAnswersHandler;
+    private readonly CompleteSessionHandler _completeSessionHandler;
 
     public InterviewSessionsController(
         CreateSessionHandler createSessionHandler,
@@ -25,7 +26,8 @@ public class InterviewSessionsController : ControllerBase
         GenerateQuestionsHandler generateQuestionsHandler,
         GetQuestionsHandler getQuestionsHandler,
         SubmitAnswerHandler submitAnswerHandler,
-        GetAnswersHandler getAnswersHandler)
+        GetAnswersHandler getAnswersHandler,
+        CompleteSessionHandler completeSessionHandler)
     {
         _createSessionHandler = createSessionHandler;
         _getSessionsHandler = getSessionsHandler;
@@ -34,6 +36,7 @@ public class InterviewSessionsController : ControllerBase
         _getQuestionsHandler = getQuestionsHandler;
         _submitAnswerHandler = submitAnswerHandler;
         _getAnswersHandler = getAnswersHandler;
+        _completeSessionHandler = completeSessionHandler;
     }
 
     [HttpPost]
@@ -123,5 +126,28 @@ public class InterviewSessionsController : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    [HttpPost("{id:guid}/complete")]
+    public async Task<IActionResult> CompleteSession(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await _completeSessionHandler.HandleAsync(id, cancellationToken);
+
+        if (result.SessionNotFound)
+        {
+            return NotFound(result.ErrorMessage);
+        }
+
+        if (result.NoAnswersSubmitted)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+
+        if (result.SessionAlreadyCompleted)
+        {
+            return Ok(result.Result);
+        }
+
+        return Ok(result.Result);
     }
 }
