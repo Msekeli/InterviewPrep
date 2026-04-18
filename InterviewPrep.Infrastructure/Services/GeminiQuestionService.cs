@@ -54,7 +54,12 @@ public class GeminiQuestionService : IQuestionService
             }
         };
 
-        var requestJson = JsonSerializer.Serialize(requestBody);
+        var requestJson = JsonSerializer.Serialize(
+            requestBody,
+            new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
 
         using var request = new HttpRequestMessage(
             HttpMethod.Post,

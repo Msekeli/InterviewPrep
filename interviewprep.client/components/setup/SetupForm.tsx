@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createSession } from "@/services/api";
+import { createSession } from "@/services/sessionApi";
 import { ContextTextArea } from "./ContextTextArea";
 
 export function SetupForm() {

@@ -37,3 +37,20 @@ export async function createSession(
 
   return response.json();
 }
+
+export async function getSessionById(
+  sessionId: string,
+): Promise<InterviewSessionDto> {
+  const response = await fetch(`${API_BASE_URL}/api/sessions/${sessionId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load session.");
+  }
+
+  return response.json();
+}

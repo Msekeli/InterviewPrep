@@ -1,0 +1,6 @@
+# Ignore local secrets
+appsettings.Development.json
+
+# Ignore all environment configs except base
+appsettings.*.json
+!appsettings.json
