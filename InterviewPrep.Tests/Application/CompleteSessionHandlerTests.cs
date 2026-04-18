@@ -64,14 +64,11 @@ public class CompleteSessionHandlerTests
             .Setup(x => x.GetQuestionsBySessionIdAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<InterviewQuestion>
             {
-                new InterviewQuestion
-                {
-                    Id = Guid.NewGuid(),
-                    InterviewSessionId = sessionId,
-                    Category = QuestionCategory.Technical,
-                    Text = "What is DI?",
-                    Order = 1
-                }
+                new InterviewQuestion(
+                    sessionId,
+                    QuestionCategory.Technical,
+                    "What is DI?",
+                    1)
             });
 
         repositoryMock
@@ -135,7 +132,11 @@ public class CompleteSessionHandlerTests
         result.Result.CompletedAtUtc.Should().Be(completedAt);
 
         evaluatorMock.Verify(
-            x => x.EvaluateAsync(It.IsAny<InterviewSession>(), It.IsAny<IReadOnlyList<InterviewQuestion>>(), It.IsAny<IReadOnlyList<InterviewAnswer>>(), It.IsAny<CancellationToken>()),
+            x => x.EvaluateAsync(
+                It.IsAny<InterviewSession>(),
+                It.IsAny<IReadOnlyList<InterviewQuestion>>(),
+                It.IsAny<IReadOnlyList<InterviewAnswer>>(),
+                It.IsAny<CancellationToken>()),
             Times.Never);
     }
 
@@ -162,14 +163,11 @@ public class CompleteSessionHandlerTests
 
         var questions = new List<InterviewQuestion>
         {
-            new InterviewQuestion
-            {
-                Id = Guid.NewGuid(),
-                InterviewSessionId = sessionId,
-                Category = QuestionCategory.Technical,
-                Text = "What is Clean Architecture?",
-                Order = 1
-            }
+            new InterviewQuestion(
+                sessionId,
+                QuestionCategory.Technical,
+                "What is Clean Architecture?",
+                1)
         };
 
         var answers = new List<InterviewAnswer>
@@ -232,10 +230,11 @@ public class CompleteSessionHandlerTests
             Times.Once);
 
         repositoryMock.Verify(
-            x => x.UpdateAsync(It.Is<InterviewSession>(s =>
-                s.Status == InterviewSessionStatus.Completed &&
-                s.OverallScore == 82m &&
-                s.Feedback == "Good structure and relevant examples."),
+            x => x.UpdateAsync(
+                It.Is<InterviewSession>(s =>
+                    s.Status == InterviewSessionStatus.Completed &&
+                    s.OverallScore == 82m &&
+                    s.Feedback == "Good structure and relevant examples."),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

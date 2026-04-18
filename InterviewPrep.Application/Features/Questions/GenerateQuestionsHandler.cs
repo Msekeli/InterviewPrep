@@ -30,6 +30,7 @@ public class GenerateQuestionsHandler
         if (existingQuestions.Count > 0)
         {
             return existingQuestions
+                .OrderBy(question => question.Order)
                 .Select(question => new QuestionDto
                 {
                     Id = question.Id,
@@ -40,16 +41,26 @@ public class GenerateQuestionsHandler
                 .ToList();
         }
 
-       var questions = await _questionService.GenerateQuestionsAsync(session, cancellationToken);
+        var generatedQuestions = await _questionService.GenerateQuestionsAsync(session, cancellationToken);
 
-        foreach (var question in questions)
+        var validQuestions = generatedQuestions
+            .Where(question => !string.IsNullOrWhiteSpace(question.Text))
+            .OrderBy(question => question.Order)
+            .ToList();
+
+        if (validQuestions.Count == 0)
         {
-            question.InterviewSessionId = sessionId;
+            throw new InvalidOperationException("No valid questions were generated.");
         }
 
-        await _interviewSessionRepository.AddQuestionsAsync(questions, cancellationToken);
+        for (var i = 0; i < validQuestions.Count; i++)
+        {
+            validQuestions[i].SetOrder(i + 1);
+        }
 
-        return questions
+        await _interviewSessionRepository.AddQuestionsAsync(validQuestions, cancellationToken);
+
+        return validQuestions
             .Select(question => new QuestionDto
             {
                 Id = question.Id,

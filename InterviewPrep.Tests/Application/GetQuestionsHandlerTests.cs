@@ -51,14 +51,11 @@ public class GetQuestionsHandlerTests
 
         var questions = new List<InterviewQuestion>
         {
-            new InterviewQuestion
-            {
-                Id = Guid.NewGuid(),
-                InterviewSessionId = sessionId,
-                Category = QuestionCategory.Technical,
-                Text = "What is C#?",
-                Order = 1
-            }
+            new InterviewQuestion(
+                sessionId,
+                QuestionCategory.Technical,
+                "What is C#?",
+                1)
         };
 
         repositoryMock

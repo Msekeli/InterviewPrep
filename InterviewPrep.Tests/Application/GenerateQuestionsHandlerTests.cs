@@ -10,174 +10,102 @@ namespace InterviewPrep.Tests.Application;
 public class GenerateQuestionsHandlerTests
 {
     [Fact]
-    public async Task HandleAsync_Should_Return_Null_When_Session_Does_Not_Exist()
+    public async Task HandleAsync_Should_Return_Null_When_Session_Not_Found()
     {
-        // Arrange
-        var repositoryMock = new Mock<IInterviewSessionRepository>();
-        var questionServiceMock = new Mock<IQuestionService>();
+        var repoMock = new Mock<IInterviewSessionRepository>();
+        var serviceMock = new Mock<IQuestionService>();
         var sessionId = Guid.NewGuid();
 
-        repositoryMock
+        repoMock
             .Setup(x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((InterviewSession?)null);
 
-        var handler = new GenerateQuestionsHandler(
-            repositoryMock.Object,
-            questionServiceMock.Object);
+        var handler = new GenerateQuestionsHandler(repoMock.Object, serviceMock.Object);
 
-        // Act
         var result = await handler.HandleAsync(sessionId, CancellationToken.None);
 
-        // Assert
         result.Should().BeNull();
-
-        repositoryMock.Verify(
-            x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()),
-            Times.Once);
-
-        questionServiceMock.Verify(
-            x => x.GenerateQuestionsAsync(It.IsAny<InterviewSession>(), It.IsAny<CancellationToken>()),
-            Times.Never);
     }
 
     [Fact]
-    public async Task HandleAsync_Should_Return_Existing_Questions_When_They_Already_Exist()
+    public async Task HandleAsync_Should_Return_Existing_Questions_When_Already_Exist()
     {
-        // Arrange
-        var repositoryMock = new Mock<IInterviewSessionRepository>();
-        var questionServiceMock = new Mock<IQuestionService>();
+        var repoMock = new Mock<IInterviewSessionRepository>();
+        var serviceMock = new Mock<IQuestionService>();
         var sessionId = Guid.NewGuid();
 
         var session = new InterviewSession
         {
-            Id = sessionId,
-            UserId = Guid.NewGuid(),
-            CvText = "C# .NET",
-            JobSpecText = "Backend role",
-            CompanyText = "Tech company",
-            TargetLevel = InterviewLevel.Intermediate,
-            Status = InterviewSessionStatus.Draft,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            Id = sessionId
         };
 
         var existingQuestions = new List<InterviewQuestion>
         {
-            new InterviewQuestion
-            {
-                Id = Guid.NewGuid(),
-                InterviewSessionId = sessionId,
-                Category = QuestionCategory.Technical,
-                Text = "What is DI?",
-                Order = 1
-            },
-            new InterviewQuestion
-            {
-                Id = Guid.NewGuid(),
-                InterviewSessionId = sessionId,
-                Category = QuestionCategory.Behavioural,
-                Text = "Tell me about teamwork.",
-                Order = 2
-            }
+            new InterviewQuestion(
+                sessionId,
+                QuestionCategory.Technical,
+                "Existing question",
+                1)
         };
 
-        repositoryMock
-            .Setup(x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()))
+        repoMock.Setup(x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
 
-        repositoryMock
-            .Setup(x => x.GetQuestionsBySessionIdAsync(sessionId, It.IsAny<CancellationToken>()))
+        repoMock.Setup(x => x.GetQuestionsBySessionIdAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingQuestions);
 
-        var handler = new GenerateQuestionsHandler(
-            repositoryMock.Object,
-            questionServiceMock.Object);
+        var handler = new GenerateQuestionsHandler(repoMock.Object, serviceMock.Object);
 
-        // Act
         var result = await handler.HandleAsync(sessionId, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(2);
-        result![0].Text.Should().Be("What is DI?");
-        result[1].Text.Should().Be("Tell me about teamwork.");
+        result!.Count.Should().Be(1);
+        result[0].Text.Should().Be("Existing question");
 
-        questionServiceMock.Verify(
-            x => x.GenerateQuestionsAsync(It.IsAny<InterviewSession>(), It.IsAny<CancellationToken>()),
-            Times.Never);
-
-        repositoryMock.Verify(
-            x => x.AddQuestionsAsync(It.IsAny<IReadOnlyList<InterviewQuestion>>(), It.IsAny<CancellationToken>()),
-            Times.Never);
+        serviceMock.Verify(x => x.GenerateQuestionsAsync(It.IsAny<InterviewSession>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
     public async Task HandleAsync_Should_Generate_And_Save_Questions_When_None_Exist()
     {
-        // Arrange
-        var repositoryMock = new Mock<IInterviewSessionRepository>();
-        var questionServiceMock = new Mock<IQuestionService>();
+        var repoMock = new Mock<IInterviewSessionRepository>();
+        var serviceMock = new Mock<IQuestionService>();
         var sessionId = Guid.NewGuid();
 
         var session = new InterviewSession
         {
-            Id = sessionId,
-            UserId = Guid.NewGuid(),
-            CvText = "Blazor and .NET",
-            JobSpecText = "Full-stack developer",
-            CompanyText = "Product company",
-            TargetLevel = InterviewLevel.Intermediate,
-            Status = InterviewSessionStatus.Draft,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            Id = sessionId
         };
 
         var generatedQuestions = new List<InterviewQuestion>
         {
-            new InterviewQuestion
-            {
-                Id = Guid.NewGuid(),
-                InterviewSessionId = sessionId,
-                Category = QuestionCategory.Technical,
-                Text = "Explain Blazor component lifecycle.",
-                Order = 1
-            }
+            new InterviewQuestion(
+                sessionId,
+                QuestionCategory.Technical,
+                "Generated question",
+                1)
         };
 
-        repositoryMock
-            .Setup(x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()))
+        repoMock.Setup(x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
 
-        repositoryMock
-            .Setup(x => x.GetQuestionsBySessionIdAsync(sessionId, It.IsAny<CancellationToken>()))
+        repoMock.Setup(x => x.GetQuestionsBySessionIdAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<InterviewQuestion>());
 
-        questionServiceMock
-            .Setup(x => x.GenerateQuestionsAsync(session, It.IsAny<CancellationToken>()))
+        serviceMock.Setup(x => x.GenerateQuestionsAsync(session, It.IsAny<CancellationToken>()))
             .ReturnsAsync(generatedQuestions);
 
-        repositoryMock
-            .Setup(x => x.AddQuestionsAsync(It.IsAny<IReadOnlyList<InterviewQuestion>>(), It.IsAny<CancellationToken>()))
+        repoMock.Setup(x => x.AddQuestionsAsync(generatedQuestions, It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-        var handler = new GenerateQuestionsHandler(
-            repositoryMock.Object,
-            questionServiceMock.Object);
+        var handler = new GenerateQuestionsHandler(repoMock.Object, serviceMock.Object);
 
-        // Act
         var result = await handler.HandleAsync(sessionId, CancellationToken.None);
 
-        // Assert
         result.Should().NotBeNull();
-        result.Should().HaveCount(1);
-        result![0].Text.Should().Be("Explain Blazor component lifecycle.");
+        result!.Count.Should().Be(1);
+        result[0].Text.Should().Be("Generated question");
 
-        questionServiceMock.Verify(
-            x => x.GenerateQuestionsAsync(session, It.IsAny<CancellationToken>()),
-            Times.Once);
-
-        repositoryMock.Verify(
-            x => x.AddQuestionsAsync(It.IsAny<IReadOnlyList<InterviewQuestion>>(), It.IsAny<CancellationToken>()),
-            Times.Once);
+        repoMock.Verify(x => x.AddQuestionsAsync(generatedQuestions, It.IsAny<CancellationToken>()), Times.Once);
     }
 }
