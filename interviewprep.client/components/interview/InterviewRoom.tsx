@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  getSessionById,
+  completeSession,
   generateQuestions,
   getQuestions,
+  getSessionById,
   submitAnswer,
   type InterviewSessionDto,
   type QuestionDto,
@@ -15,15 +17,23 @@ type InterviewRoomProps = {
 };
 
 export function InterviewRoom({ sessionId }: InterviewRoomProps) {
+  const router = useRouter();
+
+  const hasLoaded = useRef(false);
+
   const [session, setSession] = useState<InterviewSessionDto | null>(null);
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answerText, setAnswerText] = useState("");
   const [loading, setLoading] = useState(true);
-  const [submittingAnswer, setSubmittingAnswer] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (hasLoaded.current) return;
+    hasLoaded.current = true;
+
     async function loadRoom() {
       try {
         setLoading(true);
@@ -68,120 +78,151 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
     }
 
     try {
-      setSubmittingAnswer(true);
+      setSubmitting(true);
       setError("");
 
       await submitAnswer(sessionId, {
-        questionId: currentQuestion.id,
+        interviewQuestionId: currentQuestion.id,
         transcript: answerText.trim(),
       });
 
-      setAnswerText("");
-
-      if (!isLastQuestion) {
-        setCurrentIndex((prev) => prev + 1);
+      if (isLastQuestion) {
+        await handleCompleteSession();
+        return;
       }
+
+      setAnswerText("");
+      setCurrentIndex((prev) => prev + 1);
     } catch (err) {
       console.error(err);
-      setError("Failed to submit your answer.");
+      setError(
+        err instanceof Error ? err.message : "Failed to submit your answer.",
+      );
     } finally {
-      setSubmittingAnswer(false);
+      setSubmitting(false);
     }
   }
 
+  async function handleCompleteSession() {
+    try {
+      setCompleting(true);
+      setError("");
+
+      await completeSession(sessionId);
+      router.push(`/session/${sessionId}/result`);
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to complete the interview.",
+      );
+    } finally {
+      setCompleting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="surface glow-green w-full p-6 sm:p-8">
+        <p className="text-sm text-[var(--text-muted)]">
+          Loading interview room...
+        </p>
+      </section>
+    );
+  }
+
+  if (error && !session) {
+    return (
+      <section className="surface glow-green w-full p-6 sm:p-8">
+        <p className="text-sm text-red-300">{error}</p>
+      </section>
+    );
+  }
+
+  if (!session) {
+    return (
+      <section className="surface glow-green w-full p-6 sm:p-8">
+        <p className="text-sm text-red-300">Session not found.</p>
+      </section>
+    );
+  }
+
+  if (!questions.length) {
+    return (
+      <section className="surface glow-green w-full p-6 sm:p-8">
+        <p className="text-sm text-red-300">
+          No questions are available for this interview yet.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <section className="flex min-h-[calc(100vh-3rem)] items-center justify-center">
-      <div className="surface w-full max-w-5xl p-6 sm:p-8">
-        <div className="mb-6 space-y-2">
-          <p className="text-sm uppercase tracking-[0.2em] text-[var(--text-muted)]">
-            Session
-          </p>
+    <section className="surface glow-green w-full p-6 sm:p-8">
+      <div className="mb-8 space-y-3">
+        <p className="text-sm font-medium uppercase tracking-[0.2em] text-[var(--text-muted)]">
+          Interview Session
+        </p>
 
-          <h1 className="text-gradient text-3xl font-semibold tracking-tight">
-            Interview Room
-          </h1>
+        <h1 className="text-gradient text-3xl font-semibold tracking-tight sm:text-4xl">
+          Stay calm. Answer with clarity.
+        </h1>
 
-          <p className="text-sm text-[var(--text-muted)]">
-            Session ID: {sessionId}
-          </p>
-        </div>
+        <p className="text-sm leading-6 text-[var(--text-muted)] sm:text-base">
+          Question {currentIndex + 1} of {questions.length}
+        </p>
+      </div>
 
-        {loading ? (
-          <div className="rounded-2xl border border-[var(--border-soft)] p-6 text-sm text-[var(--text-muted)]">
-            Preparing your interview...
-          </div>
-        ) : error && !currentQuestion ? (
-          <div className="rounded-2xl border border-red-400/30 p-6 text-sm text-red-300">
-            {error}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-[var(--border-soft)] p-6">
-              <div className="mb-3 flex items-center justify-between gap-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                  Current question
-                </p>
+      <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5">
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
+          Current question
+        </p>
+        <p className="text-base leading-7 text-white sm:text-lg">
+          {currentQuestion.text}
+        </p>
+      </div>
 
-                <p className="text-xs text-[var(--text-muted)]">
-                  {questions.length > 0
-                    ? `Question ${currentIndex + 1} of ${questions.length}`
-                    : "No questions"}
-                </p>
-              </div>
+      <div className="space-y-3">
+        <label
+          htmlFor="answer"
+          className="text-sm font-medium text-[var(--text-muted)]"
+        >
+          Your answer
+        </label>
 
-              <p className="text-lg leading-8 text-[var(--text-primary)]">
-                {currentQuestion?.text ?? "No questions available yet."}
-              </p>
-            </div>
+        <textarea
+          id="answer"
+          value={answerText}
+          onChange={(e) => setAnswerText(e.target.value)}
+          placeholder="Type your answer here..."
+          rows={8}
+          className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none transition placeholder:text-[var(--text-muted)] focus:border-[var(--accent)]"
+          disabled={submitting || completing}
+        />
+      </div>
 
-            <div className="rounded-2xl border border-[var(--border-soft)] p-6">
-              <label
-                htmlFor="answerText"
-                className="mb-3 block text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]"
-              >
-                Your answer
-              </label>
+      {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
 
-              <textarea
-                id="answerText"
-                rows={8}
-                value={answerText}
-                onChange={(e) => setAnswerText(e.target.value)}
-                placeholder="Write your answer here..."
-                className="w-full rounded-xl border border-[var(--border-soft)] bg-transparent px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition placeholder:text-white/30 focus:border-[var(--green-soft)]"
-              />
+      <div className="mt-6 flex items-center justify-between gap-3">
+        <p className="text-xs text-[var(--text-muted)]">
+          Keep your answer grounded in real experience.
+        </p>
 
-              {error ? (
-                <p className="mt-3 text-sm text-red-300">{error}</p>
-              ) : null}
-
-              <div className="mt-4 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSubmitAnswer}
-                  disabled={submittingAnswer || !currentQuestion}
-                  className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {submittingAnswer
-                    ? "Submitting..."
-                    : isLastQuestion
-                      ? "Submit final answer"
-                      : "Next question"}
-                </button>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--border-soft)] p-6">
-              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                Session status
-              </p>
-
-              <p className="text-sm text-[var(--text-primary)]">
-                Status: {session?.status}
-              </p>
-            </div>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={handleSubmitAnswer}
+          disabled={submitting || completing}
+          className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {completing
+            ? "Finishing..."
+            : submitting
+              ? "Submitting..."
+              : isLastQuestion
+                ? "Finish interview"
+                : "Next question"}
+        </button>
       </div>
     </section>
   );
