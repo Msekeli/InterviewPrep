@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  getSessionById,
-  type InterviewSessionDto,
-} from "@/services/sessionApi";
+import { getSessionById } from "@/services/sessionApi";
+import { InterviewSessionDto } from "@/types/session";
 
 type ResultPageProps = {
   params: {

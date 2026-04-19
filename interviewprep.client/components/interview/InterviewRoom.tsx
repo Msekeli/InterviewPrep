@@ -8,9 +8,8 @@ import {
   getQuestions,
   getSessionById,
   submitAnswer,
-  type InterviewSessionDto,
-  type QuestionDto,
 } from "@/services/sessionApi";
+import type { InterviewSessionDto, QuestionDto } from "@/types/session";
 
 type InterviewRoomProps = {
   sessionId: string;
