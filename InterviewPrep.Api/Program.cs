@@ -61,18 +61,22 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddHttpClient<GeminiQuestionService>();
 builder.Services.AddScoped<IQuestionService, GeminiQuestionService>();
 
-builder.Services.AddScoped<IInterviewEvaluatorService, MockInterviewEvaluatorService>();
+builder.Services.AddHttpClient<GeminiInterviewEvaluatorService>();
+builder.Services.AddScoped<IInterviewEvaluatorService, GeminiInterviewEvaluatorService>();
 
 builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "InterviewPrep API v1");
-    options.RoutePrefix = "swagger";
-});
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "InterviewPrep API v1");
+        options.RoutePrefix = "swagger";
+    });
+}
 
 app.UseHttpsRedirection();
 app.UseCors(FrontendCorsPolicy);
