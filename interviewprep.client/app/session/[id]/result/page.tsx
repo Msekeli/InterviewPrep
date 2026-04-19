@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { getSessionById } from "@/services/sessionApi";
-import { InterviewSessionDto } from "@/types/session";
+import type { InterviewSessionDto } from "@/types/session";
+import ErrorState from "@/components/common/ErrorState";
+import LoadingState from "@/components/common/LoadingState";
+import PageShell from "@/components/common/PageShell";
+import SectionTitle from "@/components/common/SectionTitle";
+import FeedbackPanel from "@/components/result/FeedbackPanel";
+import NextStepNote from "@/components/result/NextStepNote";
+import ResultSummary from "@/components/result/ResultSummary";
+import ScoreDisplay from "@/components/result/ScoreDisplay";
 
-type ResultPageProps = {
-  params: {
-    id: string;
-  };
-};
+export default function ResultPage() {
+  const params = useParams<{ id: string }>();
+  const sessionId = params.id;
 
-export default function ResultPage({ params }: ResultPageProps) {
   const [session, setSession] = useState<InterviewSessionDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -21,91 +27,77 @@ export default function ResultPage({ params }: ResultPageProps) {
         setLoading(true);
         setError("");
 
-        const sessionData = await getSessionById(params.id);
+        const sessionData = await getSessionById(sessionId);
         setSession(sessionData);
       } catch (err) {
         console.error(err);
-        setError("Failed to load interview results.");
+        setError("Failed to load your interview result.");
       } finally {
         setLoading(false);
       }
     }
 
-    loadResult();
-  }, [params.id]);
+    if (sessionId) {
+      loadResult();
+    }
+  }, [sessionId]);
+
+  if (loading) {
+    return (
+      <PageShell>
+        <LoadingState
+          title="Loading results..."
+          message="Gathering your completed interview feedback."
+        />
+      </PageShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <PageShell>
+        <ErrorState message={error} />
+      </PageShell>
+    );
+  }
+
+  if (!session) {
+    return (
+      <PageShell>
+        <ErrorState message="Result not found." />
+      </PageShell>
+    );
+  }
 
   return (
-    <section className="flex min-h-[calc(100vh-3rem)] items-center justify-center">
-      <div className="surface w-full max-w-3xl p-6 sm:p-8">
-        <div className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.2em] text-[var(--text-muted)]">
-            Results
-          </p>
+    <PageShell className="py-4">
+      <div className="flex h-full min-h-0 w-full flex-col gap-5">
+        <SectionTitle
+          title="Your interview result"
+          subtitle="A quiet reflection on how the conversation went and where to sharpen next."
+        />
 
-          <h1 className="text-gradient text-3xl font-semibold tracking-tight">
-            Interview complete
-          </h1>
-
-          <p className="text-sm text-[var(--text-muted)]">
-            Here is how your session went.
-          </p>
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <ResultSummary
+            className="gap-5"
+            score={
+              <ScoreDisplay
+                score={session.overallScore ?? 0}
+                label="Overall Score"
+              />
+            }
+            feedback={
+              <FeedbackPanel
+                feedback={
+                  session.feedback?.trim() ||
+                  "No written feedback is available for this session yet."
+                }
+              />
+            }
+            nextStep={<NextStepNote />}
+          />
         </div>
-
-        {loading ? (
-          <div className="mt-6 rounded-2xl border border-[var(--border-soft)] p-6 text-sm text-[var(--text-muted)]">
-            Loading results...
-          </div>
-        ) : error ? (
-          <div className="mt-6 rounded-2xl border border-red-400/30 p-6 text-sm text-red-300">
-            {error}
-          </div>
-        ) : !session ? (
-          <div className="mt-6 rounded-2xl border border-red-400/30 p-6 text-sm text-red-300">
-            Result not found.
-          </div>
-        ) : (
-          <div className="mt-6 space-y-6">
-            <div className="rounded-2xl border border-[var(--border-soft)] p-6">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                Overall score
-              </p>
-
-              <div className="mt-3 flex items-end gap-2">
-                <span className="text-4xl font-semibold text-white sm:text-5xl">
-                  {session.overallScore ?? 0}
-                </span>
-                <span className="pb-1 text-sm text-[var(--text-muted)]">
-                  / 100
-                </span>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-[var(--border-soft)] p-6">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                Feedback
-              </p>
-
-              <p className="mt-3 whitespace-pre-line text-sm leading-7 text-white/90 sm:text-base">
-                {session.feedback?.trim()
-                  ? session.feedback
-                  : "No feedback is available yet."}
-              </p>
-            </div>
-
-            {session.completedAtUtc ? (
-              <div className="rounded-2xl border border-[var(--border-soft)] p-6">
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                  Completed
-                </p>
-
-                <p className="mt-3 text-sm text-white/90">
-                  {new Date(session.completedAtUtc).toLocaleString()}
-                </p>
-              </div>
-            ) : null}
-          </div>
-        )}
       </div>
-    </section>
+    </PageShell>
   );
 }
