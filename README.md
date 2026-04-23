@@ -1,57 +1,59 @@
 # 🚀 InterviewPrep
 
-InterviewPrep is an AI-powered mock interview platform built with **.NET 9 (Clean Architecture)** and **Next.js 14**, using **SQLite** as the database.
+InterviewPrep is an AI-powered mock interview platform built with **.NET 9 (Clean Architecture)**, **Next.js 14**, and **SQLite**, with backend hosted on **Azure App Service**.
 
-It simulates real interview sessions by generating AI-driven questions, capturing answers, and returning structured feedback and scoring.
+It simulates real interview sessions by generating tailored questions, capturing answers, and returning structured AI feedback and scoring using **Google Gemini**.
 
 ---
 
 # 🧠 What it does
 
-- Create interview sessions (CV + job + company context)
-- Generate tailored interview questions using AI
+- Create interview sessions (CV + job spec + company context)
+- Generate AI interview questions using Gemini
 - Conduct interactive interview sessions
 - Submit and store answers
-- Generate final evaluation with score + feedback
+- Evaluate performance with score + feedback
 
 ---
 
 # 🏗️ Architecture (High Level)
 
-### Backend (.NET 9)
+### Backend (.NET 9 – Azure Hosted)
 - Clean Architecture (API / Application / Domain / Infrastructure)
-- RESTful API for session management
-- AI service abstraction (OpenAI / Gemini / Mock)
-- SQLite database for persistence
+- REST API for interview sessions
+- AI integration using **Google Gemini**
+- SQLite database for local/dev persistence
+- Hosted on **Azure App Service**
 
 ### Frontend (Next.js 14)
 - App Router structure
-- Interview session flow (setup → interview → results)
-- Component-based UI design
+- Session setup flow
+- Live interview room UI
+- Results and feedback screen
 
 ---
 
 # 🔄 Core Flow
 
-1. Create session  
-2. Generate AI questions  
+1. Create interview session  
+2. Generate questions (Gemini)  
 3. Conduct interview  
 4. Submit answers  
-5. Evaluate results  
+5. Get AI evaluation + score  
 
 ---
 
 # ⚙️ Tech Stack
 
-- .NET 9 Web API  
-- Next.js 14 (App Router)  
-- TypeScript  
-- SQLite  
-- Entity Framework Core  
-- AI APIs (pluggable providers)
+- .NET 9 Web API (Azure Hosted)
+- Next.js 14 (App Router)
+- TypeScript
+- SQLite
+- Entity Framework Core
+- Google Gemini API
 
 ---
 
 # 🎯 Purpose
 
-A realistic AI interview simulator designed for practice, evaluation, and preparation using structured, adaptive questioning and feedback.
+A realistic interview simulator designed to help candidates practice structured interviews with AI-generated questions and feedback.
