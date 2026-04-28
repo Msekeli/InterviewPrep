@@ -9,6 +9,8 @@ import {
   getSessionById,
   submitAnswer,
 } from "@/services/sessionApi";
+import { speakText } from "@/services/speechService";
+import { startListening, stopListening } from "@/services/speechToTextService";
 import type { InterviewSessionDto, QuestionDto } from "@/types/session";
 import AppHeader from "../common/AppHeader";
 import ErrorState from "../common/ErrorState";
@@ -38,6 +40,12 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   const [completing, setCompleting] = useState(false);
   const [error, setError] = useState("");
   const [stage, setStage] = useState<InterviewStage>("asking");
+
+  // 🔊 Speech states
+  const [aiSpeaking, setAiSpeaking] = useState(false);
+  const [userSpeaking, setUserSpeaking] = useState(false);
+  const [userReady, setUserReady] = useState(false);
+  const answerRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     if (hasLoaded.current) return;
@@ -73,16 +81,36 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   const isLastQuestion = currentIndex === questions.length - 1;
   const stageStatus = getStageStatus(stage);
 
+  // 🔊 AI SPEECH FLOW
   useEffect(() => {
     if (!currentQuestion || loading || submitting || completing) return;
 
-    setStage("asking");
+    async function runSpeechFlow() {
+      try {
+        setAiSpeaking(true);
+        setStage("asking");
 
-    const timer = window.setTimeout(() => {
-      setStage("answering");
-    }, 2500);
+        await speakText(currentQuestion.text);
 
-    return () => window.clearTimeout(timer);
+        setAiSpeaking(false);
+        setStage("answering");
+
+        // 🎯 NEW: immediate readiness signal
+        setUserReady(true);
+
+        // 🎯 AUTO FOCUS INPUT
+        setTimeout(() => {
+          answerRef.current?.focus();
+        }, 50);
+      } catch (err) {
+        console.error(err);
+
+        setAiSpeaking(false);
+        setStage("answering");
+      }
+    }
+
+    runSpeechFlow();
   }, [currentQuestion, loading, submitting, completing]);
 
   async function handleCompleteSession() {
@@ -142,13 +170,29 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
     }
   }
 
+  // 🎤 USER SPEECH
+  function handleStartSpeaking() {
+    setUserSpeaking(true);
+    setUserReady(false);
+
+    startListening(
+      (partial) => setAnswerText(partial),
+      (finalText) => {
+        setAnswerText(finalText);
+        setUserReady(true);
+      },
+    );
+  }
+
+  function handleStopSpeaking() {
+    stopListening();
+    setUserSpeaking(false);
+  }
+
   if (loading) {
     return (
       <>
-        <AppHeader
-          title="Interview Session"
-          candidate={session?.cvText ? "Candidate" : "Candidate"}
-        />
+        <AppHeader title="Interview Session" candidate="Candidate" />
         <PageShell>
           <LoadingState
             title="Loading interview room..."
@@ -204,7 +248,12 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
             </div>
           ) : null}
 
-          <InterviewStagePanels stage={stage} />
+          <InterviewStagePanels
+            stage={stage}
+            aiSpeaking={aiSpeaking}
+            userSpeaking={userSpeaking}
+            userReady={userReady}
+          />
 
           <QuestionBar
             question={currentQuestion.text}
@@ -227,10 +276,16 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
 
             <div className="flex-1">
               <AnswerComposer
+                ref={answerRef}
                 value={answerText}
                 onChange={setAnswerText}
                 placeholder="Type your answer here..."
-                disabled={stage !== "answering" || submitting || completing}
+                disabled={
+                  stage !== "answering" ||
+                  aiSpeaking ||
+                  submitting ||
+                  completing
+                }
                 rows={5}
               />
             </div>
@@ -239,6 +294,9 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
               className="mt-4"
               onSubmit={handleSubmitAnswer}
               onFinish={handleCompleteSession}
+              onStartSpeaking={handleStartSpeaking}
+              onStopSpeaking={handleStopSpeaking}
+              isUserSpeaking={userSpeaking}
               isSubmitting={submitting}
               isCompleting={completing}
               isLastQuestion={isLastQuestion}
