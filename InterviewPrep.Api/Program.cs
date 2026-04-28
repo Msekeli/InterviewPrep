@@ -51,18 +51,24 @@ else
         Directory.CreateDirectory(directory);
     }
 }
+var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
+
+if (useMock)
+{
+    builder.Services.AddScoped<IQuestionService, MockQuestionService>();
+    builder.Services.AddScoped<IInterviewEvaluatorService, MockInterviewEvaluatorService>();
+}
+else
+{
+    builder.Services.AddScoped<IQuestionService, GeminiQuestionService>();
+    builder.Services.AddScoped<IInterviewEvaluatorService, GeminiInterviewEvaluatorService>();
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddScoped<IInterviewSessionRepository, InterviewSessionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-builder.Services.AddHttpClient<GeminiQuestionService>();
-builder.Services.AddScoped<IQuestionService, GeminiQuestionService>();
-
-builder.Services.AddHttpClient<GeminiInterviewEvaluatorService>();
-builder.Services.AddScoped<IInterviewEvaluatorService, GeminiInterviewEvaluatorService>();
 
 builder.Services.AddHttpClient();
 
