@@ -34,8 +34,8 @@ export default function InterviewStagePanels({
               className={[
                 "mb-3 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300",
                 aiSpeaking
-                  ? "border-green-400 bg-[rgba(34,197,94,0.15)] animate-pulse"
-                  : "border-[var(--border-soft)] bg-[rgba(255,255,255,0.05)]",
+                  ? "border-[var(--green-primary)] bg-[var(--green-tint-soft)] animate-pulse"
+                  : "border-[var(--border-soft)] bg-[var(--surface)]",
               ].join(" ")}
             >
               🎙️
@@ -86,8 +86,8 @@ export default function InterviewStagePanels({
               className={[
                 "mb-3 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300",
                 userSpeaking
-                  ? "border-yellow-400 bg-[rgba(234,179,8,0.15)] animate-pulse"
-                  : "border-[rgba(234,179,8,0.25)] bg-[rgba(234,179,8,0.08)]",
+                  ? "border-[var(--yellow-accent)] bg-[var(--yellow-tint-soft)] animate-pulse"
+                  : "border-[var(--border-soft)] bg-[var(--surface)]",
               ].join(" ")}
             >
               👤

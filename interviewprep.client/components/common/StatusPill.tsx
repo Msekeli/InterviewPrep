@@ -13,13 +13,16 @@ export default function StatusPill({
 }: StatusPillProps) {
   const variantStyles: Record<StatusVariant, string> = {
     default:
-      "border-[var(--border-soft)] bg-[rgba(34,197,94,0.1)] text-[var(--green-soft)]",
+      "border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-primary)]",
+
     success:
-      "border-[rgba(34,197,94,0.35)] bg-[rgba(34,197,94,0.15)] text-[var(--green-soft)]",
+      "border-[var(--border-soft)] bg-[rgba(34,197,94,0.12)] text-[var(--text-primary)]",
+
     warning:
-      "border-[rgba(234,179,8,0.35)] bg-[rgba(234,179,8,0.15)] text-[var(--yellow-soft)]",
+      "border-[var(--border-soft)] bg-[rgba(234,179,8,0.15)] text-[var(--text-primary)]",
+
     muted:
-      "border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.05)] text-[var(--text-muted)]",
+      "border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-muted)]",
   };
 
   return (

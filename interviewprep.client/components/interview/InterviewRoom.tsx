@@ -192,7 +192,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   if (loading) {
     return (
       <>
-        <AppHeader title="Interview Session" candidate="Candidate" />
+        <AppHeader title="Interview Session" />
         <PageShell>
           <LoadingState
             title="Loading interview room..."
@@ -206,7 +206,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   if (error && !session) {
     return (
       <>
-        <AppHeader title="Interview Session" candidate="Candidate" />
+        <AppHeader title="Interview Session"  />
         <PageShell>
           <ErrorState message={error} />
         </PageShell>
@@ -217,7 +217,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   if (!session) {
     return (
       <>
-        <AppHeader title="Interview Session" candidate="Candidate" />
+        <AppHeader title="Interview Session" />
         <PageShell>
           <ErrorState message="Session not found." />
         </PageShell>
@@ -228,7 +228,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   if (!questions.length) {
     return (
       <>
-        <AppHeader title="Interview Session" candidate="Candidate" />
+        <AppHeader title="Interview Session" />
         <PageShell>
           <ErrorState message="No questions are available for this interview yet." />
         </PageShell>
@@ -238,12 +238,15 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
 
   return (
     <>
-      <AppHeader title="Interview Session" candidate="Candidate" />
+      <AppHeader title="Interview Session" />
 
       <PageShell>
         <div className="flex h-full flex-col gap-4">
           {error ? (
-            <div className="shrink-0 rounded-xl border border-[rgba(234,179,8,0.25)] bg-[rgba(234,179,8,0.10)] px-4 py-3 text-sm text-[var(--yellow-soft)]">
+            <div
+              className="shrink-0 rounded-xl bg-[var(--surface)]
+border-l-4 border-[var(--yellow-accent)] px-4 py-3 text-sm text-[var(--yellow-soft)]"
+            >
               {error}
             </div>
           ) : null}

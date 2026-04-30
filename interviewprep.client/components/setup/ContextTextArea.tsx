@@ -30,7 +30,19 @@ export function ContextTextArea({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-[var(--border-soft)] bg-transparent px-4 py-3 text-sm text-[var(--text-primary)] outline-none transition placeholder:text-white/30 focus:border-[var(--green-soft)]"
+        className="
+      w-full
+      rounded-xl
+      border border-[var(--border-soft)]
+      bg-[var(--surface)]
+      px-4 py-3
+      text-sm
+      text-[var(--text-primary)]
+      outline-none
+      transition
+      placeholder:text-[var(--text-muted)]
+      focus:border-[var(--yellow-accent)]
+    "
       />
     </div>
   );

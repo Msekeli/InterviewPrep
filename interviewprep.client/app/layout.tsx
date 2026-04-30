@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "../styles/theme.css";
+import "../styles/base.css";
+import "../styles/ui.css";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "Interview Prep",
@@ -8,13 +12,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <div className="min-h-screen w-full">{children}</div>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <div className="min-h-screen w-full">{children}</div>
+        </ThemeProvider>
       </body>
     </html>
   );
