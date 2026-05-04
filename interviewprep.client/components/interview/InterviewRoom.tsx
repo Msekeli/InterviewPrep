@@ -62,9 +62,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
       : hasStarted
         ? "answering"
         : "asking";
-  const stageStatus = getStageStatus(
-    stage,
-  );
+  const stageStatus = getStageStatus(stage);
 
   // 🚨 loading state
   if (loading) {
@@ -119,7 +117,8 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
             question={
               !hasStarted
                 ? "Click Start Interview to begin"
-                : (currentQuestion?.text ?? "All questions answered. Finish interview.")
+                : (currentQuestion?.text ??
+                  "All questions answered. Finish interview.")
             }
             currentIndex={Math.min(index, Math.max(questions.length - 1, 0))}
             totalQuestions={questions.length}
@@ -164,7 +163,11 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
               isSubmitting={isSubmitting}
               isCompleting={isCompleting}
               isLastQuestion={isLastQuestion}
-              disabled={aiSpeaking || (stage !== "answering" && !hasCompletedQuestions)}
+              disabled={
+                hasStarted &&
+                (aiSpeaking ||
+                  (stage !== "answering" && !hasCompletedQuestions))
+              }
             />
           </div>
         </div>
