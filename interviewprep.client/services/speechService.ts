@@ -1,33 +1,29 @@
-export async function speakText(text: string): Promise<void> {
-  if (typeof window === "undefined") return;
+import * as SpeechSDK from "microsoft-cognitiveservices-speech-sdk";
 
-  // Lazy load SDK (important for Next.js)
-  const sdk = await import("microsoft-cognitiveservices-speech-sdk");
-
-  const speechConfig = sdk.SpeechConfig.fromSubscription(
-    process.env.NEXT_PUBLIC_AZURE_SPEECH_KEY!,
-    process.env.NEXT_PUBLIC_AZURE_SPEECH_REGION!,
-  );
-
-  speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural";
-
-  const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
-
-  const currentSynthesizer = new sdk.SpeechSynthesizer(
-    speechConfig,
-    audioConfig,
-  );
-
+export function speakText(text: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    currentSynthesizer.speakTextAsync(
+    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(
+      process.env.NEXT_PUBLIC_AZURE_SPEECH_KEY!,
+      process.env.NEXT_PUBLIC_AZURE_SPEECH_REGION!,
+    );
+
+    speechConfig.speechSynthesisVoiceName = "en-US-JennyNeural";
+
+    const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+    const synthesizer = new SpeechSDK.SpeechSynthesizer(
+      speechConfig,
+      audioConfig,
+    );
+
+    synthesizer.speakTextAsync(
       text,
       () => {
-        currentSynthesizer.close();
+        synthesizer.close();
         resolve();
       },
-      (error: string) => {
-        currentSynthesizer.close();
-        reject(error);
+      (err) => {
+        synthesizer.close();
+        reject(err);
       },
     );
   });
