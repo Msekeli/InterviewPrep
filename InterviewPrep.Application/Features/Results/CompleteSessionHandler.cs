@@ -1,5 +1,6 @@
 using InterviewPrep.Application.DTOs;
 using InterviewPrep.Application.Interfaces;
+using InterviewPrep.Domain.Entities;
 using InterviewPrep.Domain.Enums;
 
 namespace InterviewPrep.Application.Features.Results;
@@ -21,7 +22,9 @@ public class CompleteSessionHandler
         Guid sessionId,
         CancellationToken cancellationToken)
     {
-        var session = await _interviewSessionRepository.GetByIdAsync(sessionId, cancellationToken);
+        var session = await _interviewSessionRepository.GetByIdAsync(
+            sessionId,
+            cancellationToken);
 
         if (session is null)
         {
@@ -38,18 +41,19 @@ public class CompleteSessionHandler
             {
                 SessionAlreadyCompleted = true,
                 ErrorMessage = "Session is already completed.",
-                Result = new InterviewResultDto
-                {
-                    SessionId = session.Id,
-                    OverallScore = session.OverallScore ?? 0,
-                    Feedback = session.Feedback ?? string.Empty,
-                    CompletedAtUtc = session.CompletedAtUtc ?? session.CreatedAtUtc
-                }
+                Result = MapResult(session)
             };
         }
 
-        var questions = await _interviewSessionRepository.GetQuestionsBySessionIdAsync(sessionId, cancellationToken);
-        var answers = await _interviewSessionRepository.GetAnswersBySessionIdAsync(sessionId, cancellationToken);
+        var questions =
+            await _interviewSessionRepository.GetQuestionsBySessionIdAsync(
+                sessionId,
+                cancellationToken);
+
+        var answers =
+            await _interviewSessionRepository.GetAnswersBySessionIdAsync(
+                sessionId,
+                cancellationToken);
 
         if (answers.Count == 0)
         {
@@ -66,23 +70,41 @@ public class CompleteSessionHandler
             answers,
             cancellationToken);
 
-        session.OverallScore = evaluation.OverallScore;
-        session.Feedback = evaluation.Feedback;
+        session.Observation = evaluation.Observation;
+        session.Strengths = evaluation.Strengths;
+        session.Communication = evaluation.Communication;
+        session.GrowthOpportunity = evaluation.GrowthOpportunity;
+        session.OverallImpression = evaluation.OverallImpression;
+        session.NextFocus = evaluation.NextFocus;
+
         session.Status = InterviewSessionStatus.Completed;
         session.CompletedAtUtc = DateTime.UtcNow;
 
-        await _interviewSessionRepository.UpdateAsync(session, cancellationToken);
+        await _interviewSessionRepository.UpdateAsync(
+            session,
+            cancellationToken);
 
         return new CompleteSessionResult
         {
             IsSuccess = true,
-            Result = new InterviewResultDto
-            {
-                SessionId = session.Id,
-                OverallScore = session.OverallScore ?? 0,
-                Feedback = session.Feedback ?? string.Empty,
-                CompletedAtUtc = session.CompletedAtUtc ?? DateTime.UtcNow
-            }
+            Result = MapResult(session)
+        };
+    }
+
+    private static InterviewResultDto MapResult(
+        InterviewSession session)
+    {
+        return new InterviewResultDto
+        {
+            SessionId = session.Id,
+            Observation = session.Observation,
+            Strengths = session.Strengths,
+            Communication = session.Communication,
+            GrowthOpportunity = session.GrowthOpportunity,
+            OverallImpression = session.OverallImpression,
+            NextFocus = session.NextFocus,
+            CompletedAtUtc =
+                session.CompletedAtUtc ?? session.CreatedAtUtc
         };
     }
 }

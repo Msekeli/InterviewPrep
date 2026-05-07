@@ -28,9 +28,7 @@ public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
         var model = _configuration["Gemini:Model"] ?? "gemini-1.5-flash";
 
         if (string.IsNullOrWhiteSpace(apiKey))
-        {
             throw new InvalidOperationException("Gemini API key is not configured.");
-        }
 
         var prompt = BuildPrompt(session, questions, answers);
 
@@ -42,10 +40,7 @@ public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
                 {
                     parts = new[]
                     {
-                        new
-                        {
-                            text = prompt
-                        }
+                        new { text = prompt }
                     }
                 }
             },
@@ -69,26 +64,17 @@ public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
         var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-        {
             throw new InvalidOperationException(
-                $"Gemini evaluation request failed with status {(int)response.StatusCode}: {responseContent}");
-        }
+                $"Gemini evaluation failed with status {(int)response.StatusCode}: {responseContent}");
 
         var rawJson = ExtractTextFromGeminiResponse(responseContent);
 
         if (string.IsNullOrWhiteSpace(rawJson))
-        {
-            return BuildFallbackEvaluation(answers);
-        }
+            return BuildFallbackEvaluation();
 
         var parsed = ParseEvaluationResult(rawJson);
 
-        if (parsed is null)
-        {
-            return BuildFallbackEvaluation(answers);
-        }
-
-        return parsed;
+        return parsed ?? BuildFallbackEvaluation();
     }
 
     private static string BuildPrompt(
@@ -104,22 +90,22 @@ public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
 
         sb.AppendLine("""
 You are an interview evaluator.
-Evaluate the candidate's interview answers based on relevance, clarity, depth, communication, and real-world grounding.
 
 Return ONLY valid JSON.
 Do not wrap the JSON in markdown fences.
-Use this exact shape:
+
+Use EXACTLY this shape:
+
 {
-  "overallScore": 0,
-  "feedback": "string"
+  "observation": "string",
+  "strengths": "string",
+  "communication": "string",
+  "growthOpportunity": "string",
+  "overallImpression": "string",
+  "nextFocus": "string"
 }
 
-Scoring rules:
-- overallScore must be an integer from 0 to 100
-- do not give 100 unless the answers are truly exceptional
-- weak, vague, short, generic, or incomplete answers should score much lower
-- feedback must be honest, specific, and useful
-- feedback should be 1 to 3 short paragraphs
+Each field must be 1–3 short paragraphs.
 """);
 
         sb.AppendLine();
@@ -142,12 +128,12 @@ Scoring rules:
             orderedQuestions.TryGetValue(answer.InterviewQuestionId, out var question);
 
             sb.AppendLine();
-            sb.AppendLine($"Question: {question?.Text ?? "Unknown question"}");
+            sb.AppendLine($"Question: {question?.Text ?? "Unknown"}");
             sb.AppendLine($"Answer: {answer.Transcript}");
         }
 
         sb.AppendLine();
-        sb.AppendLine("Now return the JSON only.");
+        sb.AppendLine("Return JSON only.");
 
         return sb.ToString();
     }
@@ -156,35 +142,20 @@ Scoring rules:
     {
         try
         {
-            using var document = JsonDocument.Parse(responseContent);
+            using var doc = JsonDocument.Parse(responseContent);
 
-            var root = document.RootElement;
-
-            if (!root.TryGetProperty("candidates", out var candidates) || candidates.GetArrayLength() == 0)
-            {
+            if (!doc.RootElement.TryGetProperty("candidates", out var candidates))
                 return null;
-            }
 
-            var firstCandidate = candidates[0];
+            var first = candidates[0];
 
-            if (!firstCandidate.TryGetProperty("content", out var content))
-            {
+            if (!first.TryGetProperty("content", out var content))
                 return null;
-            }
 
-            if (!content.TryGetProperty("parts", out var parts) || parts.GetArrayLength() == 0)
-            {
+            if (!content.TryGetProperty("parts", out var parts))
                 return null;
-            }
 
-            var firstPart = parts[0];
-
-            if (!firstPart.TryGetProperty("text", out var textElement))
-            {
-                return null;
-            }
-
-            return textElement.GetString();
+            return parts[0].GetProperty("text").GetString();
         }
         catch
         {
@@ -201,42 +172,22 @@ Scoring rules:
             if (cleaned.StartsWith("```"))
             {
                 cleaned = cleaned
-                    .Replace("```json", string.Empty, StringComparison.OrdinalIgnoreCase)
-                    .Replace("```", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    .Replace("```json", "")
+                    .Replace("```", "")
                     .Trim();
             }
 
-            using var document = JsonDocument.Parse(cleaned);
-            var root = document.RootElement;
-
-            int overallScore = 0;
-            string feedback = "No feedback was returned.";
-
-            if (root.TryGetProperty("overallScore", out var scoreElement))
-            {
-                if (scoreElement.ValueKind == JsonValueKind.Number)
-                {
-                    overallScore = scoreElement.GetInt32();
-                }
-                else if (scoreElement.ValueKind == JsonValueKind.String &&
-                         int.TryParse(scoreElement.GetString(), out var parsedScore))
-                {
-                    overallScore = parsedScore;
-                }
-            }
-
-            if (root.TryGetProperty("feedback", out var feedbackElement) &&
-                feedbackElement.ValueKind == JsonValueKind.String)
-            {
-                feedback = feedbackElement.GetString() ?? feedback;
-            }
-
-            overallScore = Math.Clamp(overallScore, 0, 100);
+            using var doc = JsonDocument.Parse(cleaned);
+            var root = doc.RootElement;
 
             return new EvaluationResultDto
             {
-                OverallScore = overallScore,
-                Feedback = feedback
+                Observation = root.GetProperty("observation").GetString() ?? "",
+                Strengths = root.GetProperty("strengths").GetString() ?? "",
+                Communication = root.GetProperty("communication").GetString() ?? "",
+                GrowthOpportunity = root.GetProperty("growthOpportunity").GetString() ?? "",
+                OverallImpression = root.GetProperty("overallImpression").GetString() ?? "",
+                NextFocus = root.GetProperty("nextFocus").GetString() ?? ""
             };
         }
         catch
@@ -245,29 +196,16 @@ Scoring rules:
         }
     }
 
-    private static EvaluationResultDto BuildFallbackEvaluation(IReadOnlyList<InterviewAnswer> answers)
+    private static EvaluationResultDto BuildFallbackEvaluation()
     {
-        var averageLength = answers.Count == 0
-            ? 0
-            : (int)answers.Average(a => (a.Transcript ?? string.Empty).Trim().Length);
-
-        var score = averageLength switch
-        {
-            >= 900 => 78,
-            >= 700 => 68,
-            >= 500 => 58,
-            >= 300 => 48,
-            >= 150 => 38,
-            _ => 25
-        };
-
         return new EvaluationResultDto
         {
-            OverallScore = score,
-            Feedback =
-                "Your interview was completed, but the AI evaluator response could not be fully parsed. " +
-                "This fallback result is based on answer length only, so treat it as temporary. " +
-                "Review your answers for clearer structure, stronger examples, and more direct relevance to the role."
+            Observation = "The AI response could not be parsed. Provide clearer, more structured answers.",
+            Strengths = "Fallback evaluation: strengths could not be determined.",
+            Communication = "Fallback evaluation: communication clarity could not be assessed.",
+            GrowthOpportunity = "Fallback evaluation: consider improving depth and specificity.",
+            OverallImpression = "Fallback evaluation: insufficient data for a full impression.",
+            NextFocus = "Fallback evaluation: focus on structured examples and measurable outcomes."
         };
     }
 }

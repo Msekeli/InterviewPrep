@@ -33,8 +33,14 @@ public class GetSessionByIdHandler
             Status = session.Status,
             CreatedAtUtc = session.CreatedAtUtc,
             CompletedAtUtc = session.CompletedAtUtc,
-            OverallScore = session.OverallScore,
-            Feedback = session.Feedback
+
+            // NEW qualitative fields
+            Observation = session.Observation,
+            Strengths = session.Strengths,
+            Communication = session.Communication,
+            GrowthOpportunity = session.GrowthOpportunity,
+            OverallImpression = session.OverallImpression,
+            NextFocus = session.NextFocus
         };
     }
 }

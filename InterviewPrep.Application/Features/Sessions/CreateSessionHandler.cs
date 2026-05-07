@@ -7,13 +7,17 @@ namespace InterviewPrep.Application.Features.Sessions;
 
 public class CreateSessionHandler
 {
-    private static readonly Guid TemporaryUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    private static readonly Guid TemporaryUserId =
+        Guid.Parse("11111111-1111-1111-1111-111111111111");
 
-    private readonly IInterviewSessionRepository _interviewSessionRepository;
+    private readonly IInterviewSessionRepository
+        _interviewSessionRepository;
 
-    public CreateSessionHandler(IInterviewSessionRepository interviewSessionRepository)
+    public CreateSessionHandler(
+        IInterviewSessionRepository interviewSessionRepository)
     {
-        _interviewSessionRepository = interviewSessionRepository;
+        _interviewSessionRepository =
+            interviewSessionRepository;
     }
 
     public async Task<InterviewSessionDto> HandleAsync(
@@ -24,29 +28,48 @@ public class CreateSessionHandler
         {
             Id = Guid.NewGuid(),
             UserId = TemporaryUserId,
+
             CvText = request.CvText,
             JobSpecText = request.JobSpecText,
             CompanyText = request.CompanyText,
+
             TargetLevel = request.TargetLevel,
             Status = InterviewSessionStatus.Draft,
+
             CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+
+            Observation = string.Empty,
+            Strengths = string.Empty,
+            Communication = string.Empty,
+            GrowthOpportunity = string.Empty,
+            OverallImpression = string.Empty,
+            NextFocus = string.Empty
         };
 
-        await _interviewSessionRepository.AddAsync(session, cancellationToken);
+        await _interviewSessionRepository.AddAsync(
+            session,
+            cancellationToken);
 
         return new InterviewSessionDto
         {
             Id = session.Id,
+
             CvText = session.CvText,
             JobSpecText = session.JobSpecText,
             CompanyText = session.CompanyText,
+
             TargetLevel = session.TargetLevel,
             Status = session.Status,
+
             CreatedAtUtc = session.CreatedAtUtc,
             CompletedAtUtc = session.CompletedAtUtc,
-            OverallScore = session.OverallScore,
-            Feedback = session.Feedback
+
+            Observation = session.Observation,
+            Strengths = session.Strengths,
+            Communication = session.Communication,
+            GrowthOpportunity = session.GrowthOpportunity,
+            OverallImpression = session.OverallImpression,
+            NextFocus = session.NextFocus
         };
     }
 }

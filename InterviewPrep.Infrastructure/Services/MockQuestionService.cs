@@ -15,38 +15,32 @@ public class MockQuestionService : IQuestionService
             new InterviewQuestion(
                 session.Id,
                 QuestionCategory.Behavioural,
-                "Tell us about a time you modernized a legacy system. What challenges did you face during the .NET 4 → .NET 9 migration, and how did you ensure the new Blazor components integrated smoothly?",
+                "I’ve reviewed your background and noticed experience across both customer-facing platforms and enterprise systems. Could you briefly tell me about your journey as a software engineer?",
                 1),
 
             new InterviewQuestion(
                 session.Id,
                 QuestionCategory.Technical,
-                "Walk us through your approach to translating Figma designs into pixel-perfect React components. How do you ensure consistency across devices and browsers?",
+                "You’ve worked with both React and Blazor. How do you decide which one to use for a project?",
                 2),
 
             new InterviewQuestion(
                 session.Id,
-                QuestionCategory.Behavioural,
-                "Describe a situation where you collaborated with designers, backend engineers, or product teams. How did you handle conflicting requirements or feedback?",
+                QuestionCategory.Technical,
+                "You’ve also worked with Azure. What’s your understanding of the shared responsibility model in cloud computing?",
                 3),
 
             new InterviewQuestion(
                 session.Id,
                 QuestionCategory.Technical,
-                "Can you explain how you integrated a frontend feature with Azure Functions? What tools did you use to test and validate the endpoints?",
+                "As systems grow, how do you make sure your code stays maintainable and aligned with SOLID principles?",
                 4),
 
             new InterviewQuestion(
                 session.Id,
-                QuestionCategory.Technical,
-                "How do you typically work with stored procedures in SQL Server from .NET? Describe a scenario where you retrieved and displayed complex production data.",
-                5),
-
-            new InterviewQuestion(
-                session.Id,
                 QuestionCategory.Behavioural,
-                "Tell us about a project you built independently or took major ownership of. What architectural and UI decisions did you make?",
-                6)
+                "What’s a project you’re particularly proud of, and what made it meaningful to you?",
+                5)
         };
 
         return Task.FromResult<IReadOnlyList<InterviewQuestion>>(questions);

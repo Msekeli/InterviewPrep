@@ -17,7 +17,9 @@ public class GetSessionsHandler
     public async Task<IReadOnlyList<InterviewSessionDto>> HandleAsync(
         CancellationToken cancellationToken = default)
     {
-        var sessions = await _interviewSessionRepository.GetByUserIdAsync(TemporaryUserId, cancellationToken);
+        var sessions = await _interviewSessionRepository.GetByUserIdAsync(
+            TemporaryUserId,
+            cancellationToken);
 
         return sessions.Select(session => new InterviewSessionDto
         {
@@ -29,8 +31,15 @@ public class GetSessionsHandler
             Status = session.Status,
             CreatedAtUtc = session.CreatedAtUtc,
             CompletedAtUtc = session.CompletedAtUtc,
-            OverallScore = session.OverallScore,
-            Feedback = session.Feedback
+
+            // NEW qualitative fields
+            Observation = session.Observation,
+            Strengths = session.Strengths,
+            Communication = session.Communication,
+            GrowthOpportunity = session.GrowthOpportunity,
+            OverallImpression = session.OverallImpression,
+            NextFocus = session.NextFocus
+
         }).ToList();
     }
 }
