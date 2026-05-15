@@ -16,6 +16,9 @@
 
   --glow-green: 0 0 18px rgba(34, 197, 94, 0.2);
   --glow-yellow: 0 0 16px rgba(234, 179, 8, 0.2);
+
+  --highlight-bg: rgba(234, 179, 8, 0.08);
+  --highlight-border: rgba(234, 179, 8, 0.25);
 }
 .dark {
   --bg: #0b1f14;
@@ -35,4 +38,7 @@
 
   --glow-green: 0 0 28px rgba(34, 197, 94, 0.3);
   --glow-yellow: 0 0 22px rgba(234, 179, 8, 0.25);
+
+  --highlight-bg: rgba(234, 179, 8, 0.12);
+  --highlight-border: rgba(250, 204, 21, 0.35);
 }

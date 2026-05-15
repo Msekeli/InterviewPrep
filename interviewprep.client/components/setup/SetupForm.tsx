@@ -102,7 +102,7 @@ export function SetupForm() {
               </div>
 
               {/* RIGHT: TIP CARD */}
-              <div className="surface border border-[var(--border-soft)] rounded-2xl p-5">
+              <div className="highlight-surface border border-[var(--border-soft)] rounded-2xl p-5">
                 <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">
                   Tip
                 </p>

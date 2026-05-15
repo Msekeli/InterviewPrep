@@ -3,7 +3,11 @@
   border: 1px solid var(--border-soft);
   border-radius: 16px;
 }
-
+.highlight-surface {
+  background: var(--highlight-bg);
+  border: 1px solid var(--highlight-border);
+  border-radius: 16px;
+}
 .surface-strong {
   background: var(--surface-strong);
   border-radius: 16px;

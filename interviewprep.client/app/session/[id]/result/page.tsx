@@ -2,22 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+
+import { Code2, MessageSquare } from "lucide-react";
+
 import { getSessionById } from "@/services/sessionApi";
+
 import type { InterviewSessionDto } from "@/types/session";
+
 import ErrorState from "@/components/common/ErrorState";
 import LoadingState from "@/components/common/LoadingState";
 import PageShell from "@/components/common/PageShell";
 import SectionTitle from "@/components/common/SectionTitle";
-import FeedbackPanel from "@/components/result/FeedbackPanel";
-import NextStepNote from "@/components/result/NextStepNote";
-import ResultSummary from "@/components/result/ResultSummary";
-import ScoreDisplay from "@/components/result/ScoreDisplay";
+
+import CoachingSection from "@/components/result/CoachingSection";
+import CoachHighlight from "@/components/result/CoachHighlight";
 
 export default function ResultPage() {
   const params = useParams<{ id: string }>();
   const sessionId = params.id;
 
   const [session, setSession] = useState<InterviewSessionDto | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -27,11 +32,13 @@ export default function ResultPage() {
         setLoading(true);
         setError("");
 
-        const sessionData = await getSessionById(sessionId);
-        setSession(sessionData);
+        const result = await getSessionById(sessionId);
+
+        setSession(result);
       } catch (err) {
         console.error(err);
-        setError("Failed to load your interview result.");
+
+        setError("Failed to load your interview reflection.");
       } finally {
         setLoading(false);
       }
@@ -46,8 +53,8 @@ export default function ResultPage() {
     return (
       <PageShell>
         <LoadingState
-          title="Loading results..."
-          message="Gathering your completed interview feedback."
+          title="Loading reflection..."
+          message="Gathering your coaching insights."
         />
       </PageShell>
     );
@@ -64,39 +71,52 @@ export default function ResultPage() {
   if (!session) {
     return (
       <PageShell>
-        <ErrorState message="Result not found." />
+        <ErrorState message="Reflection not found." />
       </PageShell>
     );
   }
 
   return (
     <PageShell className="py-4">
-      <div className="flex h-full min-h-0 w-full flex-col gap-5">
+      <div className="space-y-6">
         <SectionTitle
-          title="Your interview result"
-          subtitle="A quiet reflection on how the conversation went and where to sharpen next."
+          title="Interview Reflection"
+          subtitle="A quiet reflection on your experience, your communication, and where to sharpen next."
         />
 
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-          <ResultSummary
-            className="gap-5"
-            score={
-              <ScoreDisplay
-                score={session.overallScore ?? 0}
-                label="Overall Score"
-              />
-            }
-            feedback={
-              <FeedbackPanel
-                feedback={
-                  session.feedback?.trim() ||
-                  "No written feedback is available for this session yet."
-                }
-              />
-            }
-            nextStep={<NextStepNote />}
+        <CoachHighlight
+          title="Observation"
+          message={session.observation || "Your interview reflection is ready."}
+        />
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <CoachingSection
+            title="Technical Strength"
+            icon={<Code2 size={20} />}
+            content={`
+${session.strengths || "Strong technical foundations were demonstrated."}
+
+${session.overallImpression || ""}
+            `.trim()}
+          />
+
+          <CoachingSection
+            title="Communication & Growth"
+            icon={<MessageSquare size={20} />}
+            content={`
+${session.communication || "Your answers were clear and structured."}
+
+${session.growthOpportunity || ""}
+            `.trim()}
           />
         </div>
+
+        <CoachHighlight
+          title="Next Focus"
+          message={
+            session.nextFocus || "Continue practicing real-world storytelling."
+          }
+        />
       </div>
     </PageShell>
   );

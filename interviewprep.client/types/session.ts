@@ -14,8 +14,13 @@ export type InterviewSessionDto = {
   status: number;
   createdAtUtc: string;
   completedAtUtc?: string | null;
-  overallScore?: number | null;
-  feedback?: string | null;
+
+  observation: string;
+  strengths: string;
+  communication: string;
+  growthOpportunity: string;
+  overallImpression: string;
+  nextFocus: string;
 };
 
 export type QuestionDto = {
@@ -40,7 +45,13 @@ export type AnswerDto = {
 
 export type InterviewResultDto = {
   sessionId: string;
-  overallScore: number;
-  feedback: string;
+
+  observation: string;
+  strengths: string;
+  communication: string;
+  growthOpportunity: string;
+  overallImpression: string;
+  nextFocus: string;
+
   completedAtUtc: string;
 };

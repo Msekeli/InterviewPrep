@@ -28,7 +28,7 @@ export default function InterviewStagePanels({
             : "",
         ].join(" ")}
       >
-        <div className="flex min-h-[110px] items-center justify-center">
+        <div className="flex min-h-[110px] highlight-surface items-center justify-center">
           <div className="flex flex-col items-center text-center">
             {/* 🎙 AI MIC VISUAL */}
             <div
