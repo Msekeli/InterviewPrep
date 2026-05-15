@@ -21,22 +21,28 @@ export default function QuestionBar({
 
   useEffect(() => {
     let index = 0;
+
     setDisplayedText("");
 
     const interval = setInterval(() => {
       index++;
+
       setDisplayedText(question.slice(0, index));
 
       if (index >= question.length) {
         clearInterval(interval);
       }
-    }, 20); // speed (lower = faster)
+    }, 20);
 
     return () => clearInterval(interval);
   }, [question]);
 
+  const surfaceClass = className.includes("highlight-surface") ? "" : "surface";
+
   return (
-    <section className={`surface px-5 py-5 ${className}`.trim()}>
+    <section
+      className={`${surfaceClass} px-5 py-5 transition-all duration-300 ${className}`.trim()}
+    >
       <div className="flex items-center justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
           Current Question
@@ -49,6 +55,7 @@ export default function QuestionBar({
 
       <p className="mt-4 text-base leading-7 text-[var(--text-primary)] sm:text-lg">
         {displayedText}
+
         <span className="ml-1 animate-pulse">|</span>
       </p>
     </section>

@@ -25,8 +25,12 @@ const AnswerComposer = forwardRef<HTMLTextAreaElement, AnswerComposerProps>(
       onChange(event.target.value);
     }
 
+    const surfaceClass = className.includes("highlight-surface")
+      ? ""
+      : "surface";
+
     return (
-      <section className={`space-y-3 ${className}`.trim()}>
+      <section className="space-y-3">
         <label
           htmlFor="answer-composer"
           className="block text-sm font-medium text-[var(--text-primary)]"
@@ -42,7 +46,7 @@ const AnswerComposer = forwardRef<HTMLTextAreaElement, AnswerComposerProps>(
           placeholder={placeholder}
           disabled={disabled}
           rows={rows}
-          className="surface min-h-[180px] w-full resize-y px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] disabled:cursor-not-allowed disabled:opacity-60"
+          className={`${surfaceClass} min-h-[180px] w-full resize-y px-4 py-3 text-sm leading-7 text-[var(--text-primary)] outline-none placeholder:text-[var(--text-muted)] disabled:cursor-not-allowed disabled:opacity-60 transition-all duration-300 ${className}`.trim()}
         />
       </section>
     );

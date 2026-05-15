@@ -123,6 +123,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
 
           {/* 📌 QUESTION */}
           <QuestionBar
+            className={!userTyping ? "highlight-surface" : ""}
             question={
               !hasStarted
                 ? "Click Start Interview to begin"
@@ -148,6 +149,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
               onChange={setAnswerText}
               disabled={!hasStarted || aiSpeaking || hasCompletedQuestions}
               rows={5}
+              className={userTyping ? "highlight-surface" : ""}
               placeholder={
                 !hasStarted
                   ? "Click Start Interview to begin typing..."
