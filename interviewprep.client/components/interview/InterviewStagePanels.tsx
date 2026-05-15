@@ -24,19 +24,19 @@ export default function InterviewStagePanels({
         className={[
           "transition-all duration-300",
           aiSpeaking
-            ? "ring-2 ring-[rgba(34,197,94,0.65)] shadow-[var(--glow-green)] scale-[1.02]"
+            ? "highlight-surface shadow-[var(--glow-green)] scale-[1.02]"
             : "",
         ].join(" ")}
       >
-        <div className="flex min-h-[110px] highlight-surface items-center justify-center">
+        <div className="flex min-h-[110px]  items-center justify-center">
           <div className="flex flex-col items-center text-center">
             {/* 🎙 AI MIC VISUAL */}
             <div
               className={[
                 "mb-3 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300",
                 aiSpeaking
-                  ? "border-[var(--green-primary)] bg-[var(--green-tint-soft)] animate-pulse scale-110"
-                  : "border-[var(--border-soft)] bg-[var(--surface)] scale-100",
+                  ? "border-[var(--green-primary)] highlight-surface  animate-pulse scale-110"
+                  : "border-[var(--border-soft)] surface scale-100",
               ].join(" ")}
               style={{
                 transform: aiSpeaking ? "scale(1.15)" : "scale(1)",
@@ -47,12 +47,12 @@ export default function InterviewStagePanels({
 
             {/* 🔊 AI SOUND WAVES */}
             {aiSpeaking && (
-              <div className="flex items-end gap-[3px] mb-2">
+              <div className="mb-2 flex items-end gap-[3px]">
                 <span className="h-2 w-1 animate-pulse bg-[var(--green-primary)]" />
-                <span className="h-3 w-1 animate-pulse bg-[var(--green-primary)] delay-75" />
-                <span className="h-4 w-1 animate-pulse bg-[var(--green-primary)] delay-150" />
-                <span className="h-3 w-1 animate-pulse bg-[var(--green-primary)] delay-200" />
-                <span className="h-2 w-1 animate-pulse bg-[var(--green-primary)] delay-300" />
+                <span className="delay-75 h-3 w-1 animate-pulse bg-[var(--green-primary)]" />
+                <span className="delay-150 h-4 w-1 animate-pulse bg-[var(--green-primary)]" />
+                <span className="delay-200 h-3 w-1 animate-pulse bg-[var(--green-primary)]" />
+                <span className="delay-300 h-2 w-1 animate-pulse bg-[var(--green-primary)]" />
               </div>
             )}
 
@@ -89,9 +89,9 @@ export default function InterviewStagePanels({
         className={[
           "transition-all duration-300",
           userSpeaking
-            ? "ring-2 ring-[rgba(234,179,8,0.65)] shadow-[var(--glow-yellow)] scale-[1.02]"
+            ? "highlight-surface shadow-[var(--glow-yellow)] scale-[1.02]"
             : userReady
-              ? "ring-1 ring-[rgba(234,179,8,0.35)]"
+              ? "highlight-surface"
               : "",
         ].join(" ")}
       >
@@ -102,8 +102,8 @@ export default function InterviewStagePanels({
               className={[
                 "mb-3 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300",
                 userSpeaking
-                  ? "border-[var(--yellow-accent)] bg-[var(--yellow-tint-soft)] scale-110"
-                  : "border-[var(--border-soft)] bg-[var(--surface)] scale-100",
+                  ? "border-[var(--yellow-accent)]  scale-110"
+                  : "border-[var(--border-soft)] surface scale-100",
               ].join(" ")}
               style={{
                 transform: userSpeaking ? "scale(1.15)" : "scale(1)",
@@ -114,12 +114,12 @@ export default function InterviewStagePanels({
 
             {/* 🔊 USER SOUND WAVES */}
             {userSpeaking && (
-              <div className="flex items-end gap-[3px] mb-2">
+              <div className="mb-2 flex items-end gap-[3px]">
                 <span className="h-2 w-1 animate-pulse bg-[var(--yellow-accent)]" />
-                <span className="h-3 w-1 animate-pulse bg-[var(--yellow-accent)] delay-75" />
-                <span className="h-4 w-1 animate-pulse bg-[var(--yellow-accent)] delay-150" />
-                <span className="h-3 w-1 animate-pulse bg-[var(--yellow-accent)] delay-200" />
-                <span className="h-2 w-1 animate-pulse bg-[var(--yellow-accent)] delay-300" />
+                <span className="delay-75 h-3 w-1 animate-pulse bg-[var(--yellow-accent)]" />
+                <span className="delay-150 h-4 w-1 animate-pulse bg-[var(--yellow-accent)]" />
+                <span className="delay-200 h-3 w-1 animate-pulse bg-[var(--yellow-accent)]" />
+                <span className="delay-300 h-2 w-1 animate-pulse bg-[var(--yellow-accent)]" />
               </div>
             )}
 
