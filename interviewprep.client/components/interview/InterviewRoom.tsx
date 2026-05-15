@@ -14,6 +14,7 @@ import AnswerComposer from "./AnswerComposer";
 import StatusPill from "../common/StatusPill";
 
 import { getStageStatus, type InterviewStage } from "./interviewStage";
+
 import { useInterviewController } from "./useInterviewController";
 
 type InterviewRoomProps = {
@@ -54,7 +55,11 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
 
   // 🧠 derived state
   const hasCompletedQuestions = index >= questions.length;
+
   const isLastQuestion = hasCompletedQuestions;
+
+  const userTyping = answerText.trim().length > 0;
+
   const stage: InterviewStage = isSubmitting
     ? "submitting"
     : isCompleting
@@ -62,6 +67,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
       : hasStarted
         ? "answering"
         : "asking";
+
   const stageStatus = getStageStatus(stage);
 
   // 🚨 loading state
@@ -69,6 +75,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
     return (
       <>
         <AppHeader title="Interview Session" />
+
         <PageShell>
           <LoadingState
             title="Loading..."
@@ -84,6 +91,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
     return (
       <>
         <AppHeader title="Interview Session" />
+
         <PageShell>
           <ErrorState message="Unable to load interview session." />
         </PageShell>
@@ -96,23 +104,24 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
       <AppHeader title="Interview Session" />
 
       <PageShell>
-        <div className="flex flex-col gap-4 h-full">
-          {/* 🟡 STATUS ERROR (if any) */}
+        <div className="flex h-full flex-col gap-4">
+          {/* 🟡 STATUS ERROR */}
           {error && (
             <div className="rounded-xl border-l-4 border-[var(--yellow-accent)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--yellow-soft)]">
               {error}
             </div>
           )}
 
-          {/* 🎭 AI / USER VISUAL PANELS */}
+          {/* 🎭 AI / USER */}
           <InterviewStagePanels
             stage={stage}
             aiSpeaking={aiSpeaking}
             userSpeaking={userSpeaking}
             userReady={userReady}
+            userTyping={userTyping}
           />
 
-          {/* 📌 QUESTION DISPLAY */}
+          {/* 📌 QUESTION */}
           <QuestionBar
             question={
               !hasStarted
@@ -124,8 +133,8 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
             totalQuestions={questions.length}
           />
 
-          {/* 🧱 MAIN INTERVIEW BOX */}
-          <div className="surface flex flex-col flex-1 p-5">
+          {/* 🧱 MAIN BOX */}
+          <div className="surface flex flex-1 flex-col p-5">
             <div className="mb-4 flex justify-between">
               <StatusPill
                 label={stageStatus.label}
@@ -133,7 +142,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
               />
             </div>
 
-            {/* ✍️ ANSWER INPUT */}
+            {/* ✍️ ANSWER */}
             <AnswerComposer
               value={answerText}
               onChange={setAnswerText}
@@ -155,6 +164,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
               onSubmit={submitAnswer}
               onFinish={async () => {
                 await finishInterview();
+
                 router.push(`/session/${sessionId}/result`);
               }}
               onStartSpeaking={handleStartSpeaking}

@@ -6,6 +6,7 @@ type InterviewStagePanelsProps = {
   aiSpeaking: boolean;
   userSpeaking: boolean;
   userReady: boolean;
+  userTyping: boolean;
 };
 
 export default function InterviewStagePanels({
@@ -13,48 +14,36 @@ export default function InterviewStagePanels({
   aiSpeaking,
   userSpeaking,
   userReady,
+  userTyping,
 }: InterviewStagePanelsProps) {
   return (
     <div className="grid gap-3 lg:grid-cols-2">
-      {/* 🔵 AI INTERVIEWER */}
+      {/* 🔵 AI */}
       <ParticipantPanel
         title="AI Interviewer"
         subtitle={aiSpeaking ? "Speaking..." : "Waiting for your response."}
         badge={aiSpeaking ? "Speaking" : "Listening"}
         className={[
           "transition-all duration-300",
-          aiSpeaking
-            ? "highlight-surface shadow-[var(--glow-green)] scale-[1.02]"
-            : "",
+
+          !userTyping ? "highlight-surface" : "",
+
+          aiSpeaking ? "shadow-[var(--glow-green)] scale-[1.02]" : "",
         ].join(" ")}
       >
-        <div className="flex min-h-[110px]  items-center justify-center">
+        <div className="flex min-h-[110px] items-center justify-center">
           <div className="flex flex-col items-center text-center">
-            {/* 🎙 AI MIC VISUAL */}
             <div
               className={[
                 "mb-3 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300",
+
                 aiSpeaking
-                  ? "border-[var(--green-primary)] highlight-surface  animate-pulse scale-110"
-                  : "border-[var(--border-soft)] surface scale-100",
+                  ? "border-[var(--green-primary)] surface-strong"
+                  : "border-[var(--border-soft)] surface",
               ].join(" ")}
-              style={{
-                transform: aiSpeaking ? "scale(1.15)" : "scale(1)",
-              }}
             >
               🎙️
             </div>
-
-            {/* 🔊 AI SOUND WAVES */}
-            {aiSpeaking && (
-              <div className="mb-2 flex items-end gap-[3px]">
-                <span className="h-2 w-1 animate-pulse bg-[var(--green-primary)]" />
-                <span className="delay-75 h-3 w-1 animate-pulse bg-[var(--green-primary)]" />
-                <span className="delay-150 h-4 w-1 animate-pulse bg-[var(--green-primary)]" />
-                <span className="delay-200 h-3 w-1 animate-pulse bg-[var(--green-primary)]" />
-                <span className="delay-300 h-2 w-1 animate-pulse bg-[var(--green-primary)]" />
-              </div>
-            )}
 
             <p className="text-base font-semibold text-[var(--text-primary)]">
               AI Interviewer
@@ -88,40 +77,25 @@ export default function InterviewStagePanels({
         }
         className={[
           "transition-all duration-300",
-          userSpeaking
-            ? "highlight-surface shadow-[var(--glow-yellow)] scale-[1.02]"
-            : userReady
-              ? "highlight-surface"
-              : "",
+
+          userTyping ? "highlight-surface" : "",
+
+          userSpeaking ? "shadow-[var(--glow-yellow)] scale-[1.02]" : "",
         ].join(" ")}
       >
         <div className="flex min-h-[110px] items-center justify-center">
           <div className="flex flex-col items-center text-center">
-            {/* 🎤 USER MIC VISUAL */}
             <div
               className={[
                 "mb-3 flex h-16 w-16 items-center justify-center rounded-full border text-2xl transition-all duration-300",
+
                 userSpeaking
-                  ? "border-[var(--yellow-accent)]  scale-110"
-                  : "border-[var(--border-soft)] surface scale-100",
+                  ? "border-[var(--yellow-accent)] surface-strong"
+                  : "border-[var(--border-soft)] surface",
               ].join(" ")}
-              style={{
-                transform: userSpeaking ? "scale(1.15)" : "scale(1)",
-              }}
             >
               👤
             </div>
-
-            {/* 🔊 USER SOUND WAVES */}
-            {userSpeaking && (
-              <div className="mb-2 flex items-end gap-[3px]">
-                <span className="h-2 w-1 animate-pulse bg-[var(--yellow-accent)]" />
-                <span className="delay-75 h-3 w-1 animate-pulse bg-[var(--yellow-accent)]" />
-                <span className="delay-150 h-4 w-1 animate-pulse bg-[var(--yellow-accent)]" />
-                <span className="delay-200 h-3 w-1 animate-pulse bg-[var(--yellow-accent)]" />
-                <span className="delay-300 h-2 w-1 animate-pulse bg-[var(--yellow-accent)]" />
-              </div>
-            )}
 
             <p className="text-base font-semibold text-[var(--text-primary)]">
               You

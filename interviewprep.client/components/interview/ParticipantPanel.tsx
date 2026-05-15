@@ -32,11 +32,12 @@ export default function ParticipantPanel({
     isSpeaking ? "opacity-100 scale-[1.03] shadow-[var(--glow-green)]" : "",
   ].join(" ");
 
+  const surfaceClass = className.includes("highlight-surface") ? "" : "surface";
+
   return (
     <section
-      className={`surface px-5 py-5 ${stateClasses} ${className}`.trim()}
+      className={`${surfaceClass} px-5 py-5 ${stateClasses} ${className}`.trim()}
     >
-      {/* 🔥 animated glow layer */}
       {isSpeaking && (
         <div className="pointer-events-none absolute inset-0 animate-pulse bg-gradient-to-r from-transparent via-white/5 to-transparent" />
       )}
@@ -57,8 +58,8 @@ export default function ParticipantPanel({
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-all duration-300
               ${
                 isSpeaking
-                  ? "border-[var(--green-primary)] bg-[var(--green-tint-strong)] text-[var(--text-primary)]"
-                  : "border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-muted)]"
+                  ? "border-[var(--green-primary)] surface-strong text-[var(--text-primary)]"
+                  : "border-[var(--border-soft)] surface text-[var(--text-muted)]"
               }
             `}
           >
