@@ -65,7 +65,7 @@ else
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}"));
+    options.UseSqlite($"Data Source={dbPath}", b => b.MigrationsAssembly("InterviewPrep.Infrastructure")));
 
 builder.Services.AddScoped<IInterviewSessionRepository, InterviewSessionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -91,8 +91,17 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Database migration failed");
+        throw;
+    }
 }
 
 app.Run();
