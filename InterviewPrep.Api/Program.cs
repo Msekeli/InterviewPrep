@@ -1,3 +1,4 @@
+using InterviewPrep.Api.Middleware;
 using InterviewPrep.Application.Features.Questions;
 using InterviewPrep.Application.Features.Results;
 using InterviewPrep.Application.Features.Sessions;
@@ -51,18 +52,10 @@ else
         Directory.CreateDirectory(directory);
     }
 }
-var useMock = builder.Configuration.GetValue<bool>("UseMockServices");
-
-if (useMock)
-{
-    builder.Services.AddScoped<IQuestionService, MockQuestionService>();
-    builder.Services.AddScoped<IInterviewEvaluatorService, MockInterviewEvaluatorService>();
-}
-else
-{
-    builder.Services.AddScoped<IQuestionService, GeminiQuestionService>();
-    builder.Services.AddScoped<IInterviewEvaluatorService, GeminiInterviewEvaluatorService>();
-}
+// Swap these for a real AI-backed IQuestionService / IInterviewEvaluatorService
+// implementation when ready to use a live provider.
+builder.Services.AddScoped<IQuestionService, MockQuestionService>();
+builder.Services.AddScoped<IInterviewEvaluatorService, MockInterviewEvaluatorService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}", b => b.MigrationsAssembly("InterviewPrep.Infrastructure")));
@@ -70,9 +63,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IInterviewSessionRepository, InterviewSessionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddHttpClient();
-
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
