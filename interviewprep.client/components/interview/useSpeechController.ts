@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { speakText } from "@/services/speechService";
 import { startListening, stopListening } from "@/services/speechToTextService";
 
@@ -34,10 +34,10 @@ export function useSpeechController(): SpeechController {
     (onPartial: (text: string) => void, onFinal: (text: string) => void) => {
       setUserSpeaking(true);
 
-      startListening(onPartial, (finalText) => {
-        onFinal(finalText);
-        setUserSpeaking(false);
-      });
+      // Continuous recognition fires `recognized` after every natural pause,
+      // not just when the user is actually done — so don't flip userSpeaking
+      // off here. It only turns off when the user explicitly calls stopMic.
+      startListening(onPartial, onFinal);
     },
     [],
   );
@@ -45,6 +45,15 @@ export function useSpeechController(): SpeechController {
   const stopMic = useCallback(() => {
     stopListening();
     setUserSpeaking(false);
+  }, []);
+
+  // Hard guarantee: if the user navigates away (e.g. the back button) while
+  // the mic is on, without ever clicking "Stop Speaking", force it off
+  // instead of leaving it running with no UI left to stop it from.
+  useEffect(() => {
+    return () => {
+      stopListening();
+    };
   }, []);
 
   return {

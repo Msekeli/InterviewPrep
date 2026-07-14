@@ -5,13 +5,38 @@ import { useEffect, useRef, useState } from "react";
 import { createSession } from "@/services/sessionApi";
 import PageShell from "../common/PageShell";
 import AppHeader from "../common/AppHeader";
+import SecondaryButton from "../common/SecondaryButton";
+import PrimaryButton from "../common/PrimaryButton";
 import StartInterviewAction from "./StartInterviewAction";
 import { ContextTextArea } from "./ContextTextArea";
+
+type Step = 0 | 1 | 2;
+
+const STEP_COUNT = 3;
+
+const STEP_META: { title: string; description: string }[] = [
+  {
+    title: "Paste your CV",
+    description:
+      "This anchors the interview to your real background and experience.",
+  },
+  {
+    title: "Paste the job spec",
+    description:
+      "The closer this is to the real posting, the more accurate the interview.",
+  },
+  {
+    title: "Company context",
+    description:
+      "Optional — helps the questions reference the company by name.",
+  },
+];
 
 export function SetupForm() {
   const router = useRouter();
   const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [step, setStep] = useState<Step>(0);
   const [cvText, setCvText] = useState("");
   const [jobSpecText, setJobSpecText] = useState("");
   const [companyText, setCompanyText] = useState("");
@@ -38,20 +63,27 @@ export function SetupForm() {
     }, 3000);
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const missingFields: string[] = [];
-
-    if (!cvText.trim()) missingFields.push("CV");
-    if (!jobSpecText.trim()) missingFields.push("job description");
-    if (!companyText.trim()) missingFields.push("company overview");
-
-    if (missingFields.length > 0) {
-      showTemporaryError(`Please complete: ${missingFields.join(", ")}.`);
+  function goNext() {
+    if (step === 0 && !cvText.trim()) {
+      showTemporaryError("Please paste your CV before continuing.");
       return;
     }
 
+    if (step === 1 && !jobSpecText.trim()) {
+      showTemporaryError("Please paste the job description before continuing.");
+      return;
+    }
+
+    setError("");
+    setStep((s) => (s < STEP_COUNT - 1 ? ((s + 1) as Step) : s));
+  }
+
+  function goBack() {
+    setError("");
+    setStep((s) => (s > 0 ? ((s - 1) as Step) : s));
+  }
+
+  async function handleStart() {
     try {
       setError("");
       setIsSubmitting(true);
@@ -71,99 +103,127 @@ export function SetupForm() {
     }
   }
 
+  const meta = STEP_META[step];
+
   return (
     <>
-      {/* HEADER */}
       <AppHeader title="Setup Interview" stage="setup" />
 
-      <PageShell className="py-8">
-        <div className="w-full max-w-5xl mx-auto">
-          {/* MAIN SURFACE */}
-          <div className="surface border border-[var(--border-soft)] rounded-2xl p-8 shadow-[0_0_25px_rgba(34,197,94,0.10)]">
+      <PageShell className="py-4">
+        <div className="mx-auto flex h-[calc(100dvh-96px)] w-full max-w-4xl flex-col">
+          <div className="surface flex h-full flex-col rounded-2xl border border-[var(--border-soft)] p-6 shadow-[0_0_25px_rgba(84,87,214,0.12)] sm:p-8">
             {/* ERROR */}
             {error ? (
-              <div className="mb-6 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+              <div className="mb-4 shrink-0 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
                 {error}
               </div>
             ) : null}
 
-            {/* HERO + TIP (BALANCED LAYOUT) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              {/* LEFT: TITLE + DESCRIPTION */}
-              <div className="lg:col-span-2 space-y-3">
-                <h1 className="text-4xl font-semibold tracking-tight text-gradient leading-tight">
-                  Build your interview context
-                </h1>
+            {/* PROGRESS + HEADER */}
+            <div className="mb-4 shrink-0 space-y-3">
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: STEP_COUNT }).map((_, i) => (
+                  <span
+                    key={i}
+                    className={[
+                      "h-1.5 rounded-full transition-all duration-500 ease-out",
+                      i === step
+                        ? "w-6 bg-[linear-gradient(135deg,var(--yellow-accent),var(--yellow-soft))]"
+                        : "w-1.5",
+                      i < step ? "bg-[var(--green-primary)]" : "",
+                      i > step ? "bg-[var(--border-soft)]" : "",
+                    ]
+                      .join(" ")
+                      .trim()}
+                  />
+                ))}
 
-                <p className="text-base text-[var(--text-muted)] leading-relaxed max-w-2xl">
-                  Paste your CV, job description, and company details. This
-                  defines the realism and depth of your interview experience.
-                </p>
+                <span className="ml-2 text-xs text-[var(--text-muted)]">
+                  Step {step + 1} of {STEP_COUNT}
+                </span>
               </div>
 
-              {/* RIGHT: TIP CARD */}
-              <div className="highlight-surface border border-[var(--border-soft)] rounded-2xl p-5">
-                <p className="text-sm font-semibold text-[var(--text-primary)] mb-2">
-                  Tip
-                </p>
-
-                <p className="text-sm text-[var(--text-muted)] leading-relaxed">
-                  Use real job descriptions and your actual experience. The
-                  closer the input, the more accurate your interview becomes.
+              <div>
+                <h1 className="font-display text-xl font-medium tracking-tight text-[var(--text-primary)] sm:text-2xl">
+                  {meta.title}
+                </h1>
+                <p className="mt-1 text-sm leading-relaxed text-[var(--text-muted)]">
+                  {meta.description}
                 </p>
               </div>
             </div>
 
-            {/* FORM */}
-            <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
-              <ContextTextArea
-                id="cvText"
-                label="CV"
-                placeholder="Paste your CV here..."
-                value={cvText}
-                onChange={(value) => {
-                  setCvText(value);
-                  if (error) setError("");
-                }}
-                rows={3}
-              />
+            {/* FIELD — fills whatever height is left, never overflows */}
+            <div className="min-h-0 flex-1">
+              {step === 0 ? (
+                <ContextTextArea
+                  id="cvText"
+                  label="CV"
+                  placeholder="Paste your CV here..."
+                  value={cvText}
+                  onChange={(value) => {
+                    setCvText(value);
+                    if (error) setError("");
+                  }}
+                  maxLength={20000}
+                  fill
+                />
+              ) : null}
 
-              <ContextTextArea
-                id="jobSpecText"
-                label="Job description"
-                placeholder="Paste the job description here..."
-                value={jobSpecText}
-                onChange={(value) => {
-                  setJobSpecText(value);
-                  if (error) setError("");
-                }}
-                rows={3}
-              />
+              {step === 1 ? (
+                <ContextTextArea
+                  id="jobSpecText"
+                  label="Job description"
+                  placeholder="Paste the job description here..."
+                  value={jobSpecText}
+                  onChange={(value) => {
+                    setJobSpecText(value);
+                    if (error) setError("");
+                  }}
+                  maxLength={10000}
+                  fill
+                />
+              ) : null}
 
-              <ContextTextArea
-                id="companyText"
-                label="Company overview"
-                placeholder="Paste company information here..."
-                value={companyText}
-                onChange={(value) => {
-                  setCompanyText(value);
-                  if (error) setError("");
-                }}
-                rows={3}
-              />
+              {step === 2 ? (
+                <ContextTextArea
+                  id="companyText"
+                  label="Company overview"
+                  placeholder="Paste company information here..."
+                  value={companyText}
+                  onChange={(value) => {
+                    setCompanyText(value);
+                    if (error) setError("");
+                  }}
+                  maxLength={5000}
+                  optional
+                  fill
+                />
+              ) : null}
+            </div>
 
-              {/* ACTION BAR */}
-              <div className="flex items-center justify-between border-t border-[var(--border-soft)] pt-6">
+            {/* FOOTER NAV */}
+            <div className="mt-4 flex shrink-0 items-center justify-between border-t border-[var(--border-soft)] pt-4">
+              {step > 0 ? (
+                <SecondaryButton onClick={goBack} disabled={isSubmitting}>
+                  Back
+                </SecondaryButton>
+              ) : (
                 <p className="text-sm text-[var(--text-muted)]">
-                  All fields must be completed before starting.
+                  Everything here stays on this device until you start.
                 </p>
+              )}
 
+              {step < STEP_COUNT - 1 ? (
+                <PrimaryButton onClick={goNext}>Continue</PrimaryButton>
+              ) : (
                 <StartInterviewAction
                   isSubmitting={isSubmitting}
                   disabled={isSubmitting}
+                  onClick={handleStart}
                 />
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         </div>
       </PageShell>

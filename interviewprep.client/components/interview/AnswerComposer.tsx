@@ -27,7 +27,7 @@ const AnswerComposer = forwardRef<HTMLTextAreaElement, AnswerComposerProps>(
 
     const surfaceClass = className.includes("highlight-surface")
       ? ""
-      : "surface";
+      : "rounded-2xl border border-dashed border-[var(--border-strong)] bg-[var(--bg)]";
 
     return (
       <section className="space-y-3">

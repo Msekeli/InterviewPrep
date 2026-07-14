@@ -20,7 +20,7 @@ export default function SectionTitle({
     <div className={`space-y-2 ${className}`.trim()}>
       {title ? (
         <h2
-          className={`text-2xl font-semibold tracking-tight text-gradient sm:text-3xl ${titleClassName}`.trim()}
+          className={`font-display text-2xl font-medium tracking-tight text-[var(--text-primary)] sm:text-3xl ${titleClassName}`.trim()}
         >
           {title}
         </h2>

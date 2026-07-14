@@ -1,4 +1,4 @@
-import PrimaryButton from "../common/PrimaryButton";
+import AccentButton from "../common/AccentButton";
 
 type StartInterviewActionProps = {
   isSubmitting?: boolean;
@@ -6,24 +6,27 @@ type StartInterviewActionProps = {
   label?: string;
   loadingLabel?: string;
   className?: string;
+  onClick?: () => void;
 };
 
 export default function StartInterviewAction({
   isSubmitting = false,
   disabled = false,
-  label = "Start Interview",
+  label = "Start interview",
   loadingLabel = "Starting...",
   className = "",
+  onClick,
 }: StartInterviewActionProps) {
   return (
     <div className={className}>
-      <PrimaryButton
-        type="submit"
+      <AccentButton
+        type="button"
+        onClick={onClick}
         disabled={disabled || isSubmitting}
         className="w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? loadingLabel : label}
-      </PrimaryButton>
+      </AccentButton>
     </div>
   );
 }

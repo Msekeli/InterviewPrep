@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 
 type AppHeaderProps = {
@@ -41,14 +42,18 @@ export default function AppHeader({
           {showBack ? (
             <button
               onClick={() => router.back()}
+              aria-label="Go back"
               className="
-                text-sm
+                flex h-9 w-9 items-center justify-center
+                rounded-full border border-[var(--border-soft)]
+                bg-[var(--surface-strong)]
                 text-[var(--text-muted)]
-                hover:text-[var(--text-primary)]
                 transition
+                hover:border-[var(--border-strong)]
+                hover:text-[var(--text-primary)]
               "
             >
-              ← Back
+              <ArrowLeft size={16} />
             </button>
           ) : null}
         </div>

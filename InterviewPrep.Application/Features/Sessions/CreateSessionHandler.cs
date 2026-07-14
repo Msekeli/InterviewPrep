@@ -33,7 +33,7 @@ public class CreateSessionHandler
             JobSpecText = request.JobSpecText,
             CompanyText = request.CompanyText,
 
-            TargetLevel = request.TargetLevel,
+            TargetLevel = request.TargetLevel ?? InterviewLevel.Intermediate,
             Status = InterviewSessionStatus.Draft,
 
             CreatedAtUtc = DateTime.UtcNow,

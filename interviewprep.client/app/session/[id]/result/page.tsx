@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-import { Code2, MessageSquare } from "lucide-react";
+import { Code2, MessageSquare, TrendingUp, Sparkles } from "lucide-react";
 
 import { getSessionById } from "@/services/sessionApi";
 
 import type { InterviewSessionDto } from "@/types/session";
 
+import AppHeader from "@/components/common/AppHeader";
 import ErrorState from "@/components/common/ErrorState";
 import LoadingState from "@/components/common/LoadingState";
 import PageShell from "@/components/common/PageShell";
@@ -51,33 +52,44 @@ export default function ResultPage() {
 
   if (loading) {
     return (
-      <PageShell>
-        <LoadingState
-          title="Loading reflection..."
-          message="Gathering your coaching insights."
-        />
-      </PageShell>
+      <>
+        <AppHeader title="Interview Reflection" stage="result" />
+        <PageShell>
+          <LoadingState
+            title="Loading reflection..."
+            message="Gathering your coaching insights."
+          />
+        </PageShell>
+      </>
     );
   }
 
   if (error) {
     return (
-      <PageShell>
-        <ErrorState message={error} />
-      </PageShell>
+      <>
+        <AppHeader title="Interview Reflection" stage="result" />
+        <PageShell>
+          <ErrorState message={error} />
+        </PageShell>
+      </>
     );
   }
 
   if (!session) {
     return (
-      <PageShell>
-        <ErrorState message="Reflection not found." />
-      </PageShell>
+      <>
+        <AppHeader title="Interview Reflection" stage="result" />
+        <PageShell>
+          <ErrorState message="Reflection not found." />
+        </PageShell>
+      </>
     );
   }
 
   return (
-    <PageShell className="py-4">
+    <>
+      <AppHeader title="Interview Reflection" stage="result" />
+      <PageShell className="py-4">
       <div className="space-y-6">
         <SectionTitle
           title="Interview Reflection"
@@ -85,39 +97,57 @@ export default function ResultPage() {
         />
 
         <CoachHighlight
+          variant="open"
           title="Observation"
           message={session.observation || "Your interview reflection is ready."}
         />
 
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           <CoachingSection
-            title="Technical Strength"
-            icon={<Code2 size={20} />}
-            content={`
-${session.strengths || "Strong technical foundations were demonstrated."}
-
-${session.overallImpression || ""}
-            `.trim()}
+            title="Strengths"
+            icon={<Code2 size={18} />}
+            content={
+              session.strengths ||
+              "Strong technical foundations were demonstrated."
+            }
           />
 
           <CoachingSection
-            title="Communication & Growth"
-            icon={<MessageSquare size={20} />}
-            content={`
-${session.communication || "Your answers were clear and structured."}
+            title="Communication"
+            icon={<MessageSquare size={18} />}
+            content={
+              session.communication || "Your answers were clear and structured."
+            }
+          />
 
-${session.growthOpportunity || ""}
-            `.trim()}
+          <CoachingSection
+            title="Growth opportunity"
+            icon={<TrendingUp size={18} />}
+            content={
+              session.growthOpportunity ||
+              "Keep building on the areas above with more specific examples."
+            }
+          />
+
+          <CoachingSection
+            title="Overall impression"
+            icon={<Sparkles size={18} />}
+            content={
+              session.overallImpression ||
+              "A solid, composed interview overall."
+            }
           />
         </div>
 
         <CoachHighlight
+          variant="close"
           title="Next Focus"
           message={
             session.nextFocus || "Continue practicing real-world storytelling."
           }
         />
       </div>
-    </PageShell>
+      </PageShell>
+    </>
   );
 }

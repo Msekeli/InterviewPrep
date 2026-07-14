@@ -15,6 +15,7 @@ export function useInterviewController(sessionId: string) {
   const [answerText, setAnswerText] = useState("");
   const [index, setIndex] = useState(0);
   const lastSpokenQuestionId = useRef<string | null>(null);
+  const committedTranscriptRef = useRef("");
 
   const questions = session.questions || [];
   const hasCompletedQuestions = index >= questions.length;
@@ -46,10 +47,28 @@ export function useInterviewController(sessionId: string) {
   }, [hasStarted, questions.length, currentQuestion, speech]);
 
   // 🎤 SPEAKING
+  // Continuous recognition fires a "final" phrase after every natural pause,
+  // not just once — so each phrase is appended to a running transcript
+  // instead of replacing whatever was already said.
   const handleStartSpeaking = () => {
+    committedTranscriptRef.current = answerText.trim();
+
     speech.startMic(
-      (partial) => setAnswerText(partial),
-      (final) => setAnswerText(final),
+      (partial) => {
+        const prefix = committedTranscriptRef.current
+          ? `${committedTranscriptRef.current} `
+          : "";
+        setAnswerText(`${prefix}${partial}`);
+      },
+      (final) => {
+        if (!final.trim()) return;
+
+        committedTranscriptRef.current = committedTranscriptRef.current
+          ? `${committedTranscriptRef.current} ${final.trim()}`
+          : final.trim();
+
+        setAnswerText(committedTranscriptRef.current);
+      },
     );
   };
 

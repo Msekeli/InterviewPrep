@@ -17,5 +17,5 @@ public class CreateSessionRequest
     public string CompanyText { get; set; } = string.Empty;
 
     [EnumDataType(typeof(InterviewLevel))]
-    public InterviewLevel TargetLevel { get; set; }
+    public InterviewLevel? TargetLevel { get; set; }
 }

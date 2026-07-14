@@ -1,44 +1,46 @@
 :root {
-  --bg: #e6f7ea;
-  --surface: #ecfdf5;
-  --surface-strong: #dcfce7;
+  --bg: #f6f5fb;
+  --surface: #ffffff;
+  --surface-strong: #eceafc;
 
-  --text-primary: #052e16;
-  --text-muted: #166534;
+  --text-primary: #201f3d;
+  --text-muted: #6a6a8f;
 
-  --border-soft: rgba(34, 197, 94, 0.15);
+  --border-soft: rgba(76, 79, 173, 0.14);
 
-  --green-primary: #22c55e;
-  --green-soft: #4ade80;
+  --green-primary: #5457d6;
+  --green-soft: #7b7ee0;
 
-  --yellow-accent: #eab308;
-  --yellow-soft: #fde047;
+  --yellow-accent: #ff8a65;
+  --yellow-soft: #ffc26b;
 
-  --glow-green: 0 0 18px rgba(34, 197, 94, 0.2);
-  --glow-yellow: 0 0 16px rgba(234, 179, 8, 0.2);
+  --glow-green: 0 0 18px rgba(84, 87, 214, 0.25);
+  --glow-yellow: 0 0 16px rgba(255, 138, 101, 0.35);
 
-  --highlight-bg: rgba(234, 179, 8, 0.08);
-  --highlight-border: rgba(234, 179, 8, 0.25);
+  --highlight-bg: rgba(255, 138, 101, 0.08);
+  --highlight-border: rgba(255, 138, 101, 0.25);
+
+  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, ui-serif, serif;
 }
 .dark {
-  --bg: #0b1f14;
-  --surface: #0f2a1b;
-  --surface-strong: #166534;
+  --bg: #14132b;
+  --surface: #1c1b3a;
+  --surface-strong: #262552;
 
-  --text-primary: #ecfdf5;
-  --text-muted: #86efac;
+  --text-primary: #f1f0fb;
+  --text-muted: #a6a6d6;
 
-  --border-soft: rgba(34, 197, 94, 0.2);
+  --border-soft: rgba(167, 168, 239, 0.2);
 
-  --green-primary: #22c55e;
-  --green-soft: #4ade80;
+  --green-primary: #7d80e6;
+  --green-soft: #9a9cee;
 
-  --yellow-accent: #fde047;
-  --yellow-soft: #fde047;
+  --yellow-accent: #ff9770;
+  --yellow-soft: #ffcf80;
 
-  --glow-green: 0 0 28px rgba(34, 197, 94, 0.3);
-  --glow-yellow: 0 0 22px rgba(234, 179, 8, 0.25);
+  --glow-green: 0 0 28px rgba(125, 128, 230, 0.4);
+  --glow-yellow: 0 0 22px rgba(255, 151, 112, 0.4);
 
-  --highlight-bg: rgba(234, 179, 8, 0.12);
-  --highlight-border: rgba(250, 204, 21, 0.35);
+  --highlight-bg: rgba(255, 151, 112, 0.14);
+  --highlight-border: rgba(255, 151, 112, 0.4);
 }

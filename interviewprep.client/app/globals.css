@@ -6,4 +6,9 @@ body {
   background: var(--bg);
   color: var(--text-primary);
   min-height: 100vh;
+  font-family:
+    var(--font-geist-sans),
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
 }

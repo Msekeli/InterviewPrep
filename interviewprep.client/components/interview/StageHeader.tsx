@@ -20,7 +20,7 @@ export default function StageHeader({
       className={`flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between ${className}`.trim()}
     >
       <div className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight text-gradient sm:text-4xl">
+        <h1 className="font-display text-3xl font-medium tracking-tight text-[var(--text-primary)] sm:text-4xl">
           {title}
         </h1>
         <p className="max-w-2xl text-sm leading-6 text-[var(--text-muted)] sm:text-base">

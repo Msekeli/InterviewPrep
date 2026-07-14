@@ -74,7 +74,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   if (loading) {
     return (
       <>
-        <AppHeader title="Interview Session" />
+        <AppHeader title="Interview Session" stage="interview" />
 
         <PageShell>
           <LoadingState
@@ -90,7 +90,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
   if (!session || error) {
     return (
       <>
-        <AppHeader title="Interview Session" />
+        <AppHeader title="Interview Session" stage="interview" />
 
         <PageShell>
           <ErrorState message="Unable to load interview session." />
@@ -101,7 +101,7 @@ export function InterviewRoom({ sessionId }: InterviewRoomProps) {
 
   return (
     <>
-      <AppHeader title="Interview Session" />
+      <AppHeader title="Interview Session" stage="interview" />
 
       <PageShell>
         <div className="flex h-full flex-col gap-4">

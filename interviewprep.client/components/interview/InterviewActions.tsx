@@ -1,4 +1,4 @@
-import PrimaryButton from "../common/PrimaryButton";
+import AccentButton from "../common/AccentButton";
 import SecondaryButton from "../common/SecondaryButton";
 
 type InterviewActionsProps = {
@@ -37,13 +37,13 @@ export default function InterviewActions({
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
       {/* 🟡 BEFORE START */}
       {!hasStarted && (
-        <SecondaryButton
+        <AccentButton
           onClick={onStartInterview}
           disabled={isBusy}
           className="w-full sm:w-auto"
         >
           Start Interview
-        </SecondaryButton>
+        </AccentButton>
       )}
 
       {/* 🟢 DURING INTERVIEW (ALL QUESTIONS EXCEPT LAST) */}
@@ -57,13 +57,13 @@ export default function InterviewActions({
             {isUserSpeaking ? "⏹ Stop Speaking" : "🎙 Speak"}
           </SecondaryButton>
 
-          <PrimaryButton
+          <AccentButton
             onClick={onSubmit}
             disabled={isBusy}
             className="w-full sm:w-auto"
           >
             {isSubmitting ? "Submitting..." : "Next Question"}
-          </PrimaryButton>
+          </AccentButton>
         </>
       )}
 

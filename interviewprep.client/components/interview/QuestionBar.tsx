@@ -53,10 +53,33 @@ export default function QuestionBar({
         </p>
       </div>
 
-      <p className="mt-4 text-base leading-7 text-[var(--text-primary)] sm:text-lg">
+      <div className="mt-3 flex items-center gap-1.5">
+        {Array.from({ length: safeTotal }).map((_, i) => {
+          const isCurrent = i === Math.min(currentIndex, safeTotal - 1);
+          const isDone = i < currentIndex;
+
+          return (
+            <span
+              key={i}
+              className={[
+                "h-1.5 rounded-full transition-all duration-500 ease-out",
+                isCurrent
+                  ? "w-6 bg-[linear-gradient(135deg,var(--yellow-accent),var(--yellow-soft))]"
+                  : "w-1.5",
+                !isCurrent && isDone ? "bg-[var(--green-primary)]" : "",
+                !isCurrent && !isDone ? "bg-[var(--border-soft)]" : "",
+              ]
+                .join(" ")
+                .trim()}
+            />
+          );
+        })}
+      </div>
+
+      <p className="font-display mt-3 text-base italic leading-7 text-[var(--text-primary)] sm:text-lg">
         {displayedText}
 
-        <span className="ml-1 animate-pulse">|</span>
+        <span className="ml-1 animate-pulse not-italic">|</span>
       </p>
     </section>
   );

@@ -16,10 +16,10 @@ export default function StatusPill({
       "border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-primary)]",
 
     success:
-      "border-[var(--border-soft)] bg-[rgba(34,197,94,0.12)] text-[var(--text-primary)]",
+      "border-[var(--border-soft)] bg-[rgba(84,87,214,0.12)] text-[var(--text-primary)]",
 
     warning:
-      "border-[var(--border-soft)] bg-[rgba(234,179,8,0.15)] text-[var(--text-primary)]",
+      "border-[var(--border-soft)] bg-[rgba(255,138,101,0.15)] text-[var(--text-primary)]",
 
     muted:
       "border-[var(--border-soft)] bg-[var(--surface)] text-[var(--text-muted)]",
