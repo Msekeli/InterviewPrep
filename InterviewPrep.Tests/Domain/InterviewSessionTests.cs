@@ -24,8 +24,7 @@ public class InterviewSessionTests
             CompanyText = "Tech company",
             TargetLevel = InterviewLevel.Intermediate,
             Status = InterviewSessionStatus.Draft,
-            CreatedAtUtc = createdAt,
-            Feedback = string.Empty
+            CreatedAtUtc = createdAt
         };
 
         // Assert
@@ -38,8 +37,12 @@ public class InterviewSessionTests
         session.Status.Should().Be(InterviewSessionStatus.Draft);
         session.CreatedAtUtc.Should().Be(createdAt);
         session.CompletedAtUtc.Should().BeNull();
-        session.OverallScore.Should().BeNull();
-        session.Feedback.Should().BeEmpty();
+        session.Observation.Should().BeEmpty();
+        session.Strengths.Should().BeEmpty();
+        session.Communication.Should().BeEmpty();
+        session.GrowthOpportunity.Should().BeEmpty();
+        session.OverallImpression.Should().BeEmpty();
+        session.NextFocus.Should().BeEmpty();
     }
 
     [Fact]
@@ -57,25 +60,32 @@ public class InterviewSessionTests
             CompanyText = "Company text",
             TargetLevel = InterviewLevel.Senior,
             Status = InterviewSessionStatus.InProgress,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         // Act
         session.Status = InterviewSessionStatus.Completed;
-        session.OverallScore = 82.5m;
-        session.Feedback = "Strong performance overall.";
+        session.Observation = "Strong performance overall.";
+        session.Strengths = "Clear, structured answers.";
+        session.Communication = "Confident and concise.";
+        session.GrowthOpportunity = "Go deeper on trade-offs made.";
+        session.OverallImpression = "A composed, credible interview.";
+        session.NextFocus = "Practice a failure-story example.";
         session.CompletedAtUtc = completedAt;
 
         // Assert
         session.Status.Should().Be(InterviewSessionStatus.Completed);
-        session.OverallScore.Should().Be(82.5m);
-        session.Feedback.Should().Be("Strong performance overall.");
+        session.Observation.Should().Be("Strong performance overall.");
+        session.Strengths.Should().Be("Clear, structured answers.");
+        session.Communication.Should().Be("Confident and concise.");
+        session.GrowthOpportunity.Should().Be("Go deeper on trade-offs made.");
+        session.OverallImpression.Should().Be("A composed, credible interview.");
+        session.NextFocus.Should().Be("Practice a failure-story example.");
         session.CompletedAtUtc.Should().Be(completedAt);
     }
 
     [Fact]
-    public void Should_Allow_Null_Score_And_CompletedAt_For_New_Draft_Session()
+    public void Should_Default_New_Draft_Session_To_Empty_Feedback_And_Null_CompletedAt()
     {
         // Act
         var session = new InterviewSession
@@ -87,13 +97,13 @@ public class InterviewSessionTests
             CompanyText = "Company text",
             TargetLevel = InterviewLevel.Junior,
             Status = InterviewSessionStatus.Draft,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         // Assert
         session.Status.Should().Be(InterviewSessionStatus.Draft);
-        session.OverallScore.Should().BeNull();
+        session.Observation.Should().BeEmpty();
+        session.NextFocus.Should().BeEmpty();
         session.CompletedAtUtc.Should().BeNull();
     }
 }

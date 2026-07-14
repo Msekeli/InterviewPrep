@@ -29,8 +29,7 @@ public class GetSessionsHandlerTests
                 CompanyText = "Tech company",
                 TargetLevel = InterviewLevel.Intermediate,
                 Status = InterviewSessionStatus.Draft,
-                CreatedAtUtc = DateTime.UtcNow.AddDays(-2),
-                Feedback = string.Empty
+                CreatedAtUtc = DateTime.UtcNow.AddDays(-2)
             },
             new InterviewSession
             {
@@ -43,8 +42,12 @@ public class GetSessionsHandlerTests
                 Status = InterviewSessionStatus.Completed,
                 CreatedAtUtc = DateTime.UtcNow.AddDays(-1),
                 CompletedAtUtc = DateTime.UtcNow,
-                OverallScore = 85m,
-                Feedback = "Strong performance."
+                Observation = "Strong performance overall.",
+                Strengths = "Clear communication.",
+                Communication = "Concise and confident.",
+                GrowthOpportunity = "Add more measurable outcomes.",
+                OverallImpression = "A strong candidate.",
+                NextFocus = "Practice a leadership example."
             }
         };
 
@@ -69,13 +72,13 @@ public class GetSessionsHandlerTests
         result[0].Status.Should().Be(sessions[0].Status);
         result[0].CreatedAtUtc.Should().Be(sessions[0].CreatedAtUtc);
         result[0].CompletedAtUtc.Should().Be(sessions[0].CompletedAtUtc);
-        result[0].OverallScore.Should().Be(sessions[0].OverallScore);
-        result[0].Feedback.Should().Be(sessions[0].Feedback);
+        result[0].Observation.Should().Be(sessions[0].Observation);
+        result[0].NextFocus.Should().Be(sessions[0].NextFocus);
 
         result[1].Id.Should().Be(sessions[1].Id);
         result[1].Status.Should().Be(InterviewSessionStatus.Completed);
-        result[1].OverallScore.Should().Be(85m);
-        result[1].Feedback.Should().Be("Strong performance.");
+        result[1].Observation.Should().Be("Strong performance overall.");
+        result[1].NextFocus.Should().Be("Practice a leadership example.");
 
         repositoryMock.Verify(
             x => x.GetByUserIdAsync(TemporaryUserId, It.IsAny<CancellationToken>()),

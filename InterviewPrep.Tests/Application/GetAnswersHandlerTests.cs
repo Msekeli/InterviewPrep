@@ -45,8 +45,7 @@ public class GetAnswersHandlerTests
             CompanyText = "Company",
             TargetLevel = InterviewLevel.Intermediate,
             Status = InterviewSessionStatus.InProgress,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         var answers = new List<InterviewAnswer>

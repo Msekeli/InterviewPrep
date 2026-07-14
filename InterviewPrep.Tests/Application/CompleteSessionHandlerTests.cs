@@ -52,8 +52,7 @@ public class CompleteSessionHandlerTests
             CompanyText = "Company",
             TargetLevel = InterviewLevel.Intermediate,
             Status = InterviewSessionStatus.InProgress,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         repositoryMock
@@ -108,8 +107,12 @@ public class CompleteSessionHandlerTests
             Status = InterviewSessionStatus.Completed,
             CreatedAtUtc = DateTime.UtcNow.AddHours(-1),
             CompletedAtUtc = completedAt,
-            OverallScore = 88m,
-            Feedback = "Strong overall performance."
+            Observation = "Strong overall performance.",
+            Strengths = "Deep technical grounding.",
+            Communication = "Clear and structured.",
+            GrowthOpportunity = "Add more measurable outcomes.",
+            OverallImpression = "A confident, credible candidate.",
+            NextFocus = "Prepare a leadership example."
         };
 
         repositoryMock
@@ -127,8 +130,12 @@ public class CompleteSessionHandlerTests
         result.SessionAlreadyCompleted.Should().BeTrue();
         result.Result.Should().NotBeNull();
         result.Result!.SessionId.Should().Be(sessionId);
-        result.Result.OverallScore.Should().Be(88m);
-        result.Result.Feedback.Should().Be("Strong overall performance.");
+        result.Result.Observation.Should().Be("Strong overall performance.");
+        result.Result.Strengths.Should().Be("Deep technical grounding.");
+        result.Result.Communication.Should().Be("Clear and structured.");
+        result.Result.GrowthOpportunity.Should().Be("Add more measurable outcomes.");
+        result.Result.OverallImpression.Should().Be("A confident, credible candidate.");
+        result.Result.NextFocus.Should().Be("Prepare a leadership example.");
         result.Result.CompletedAtUtc.Should().Be(completedAt);
 
         evaluatorMock.Verify(
@@ -157,8 +164,7 @@ public class CompleteSessionHandlerTests
             CompanyText = "Company",
             TargetLevel = InterviewLevel.Intermediate,
             Status = InterviewSessionStatus.InProgress,
-            CreatedAtUtc = DateTime.UtcNow.AddHours(-1),
-            Feedback = string.Empty
+            CreatedAtUtc = DateTime.UtcNow.AddHours(-1)
         };
 
         var questions = new List<InterviewQuestion>
@@ -182,13 +188,19 @@ public class CompleteSessionHandlerTests
             }
         };
 
+        var evaluation = new EvaluationResultDto
+        {
+            Observation = "Good structure and relevant examples.",
+            Strengths = "Solid grasp of layering principles.",
+            Communication = "Explained trade-offs clearly.",
+            GrowthOpportunity = "Mention testing strategy next time.",
+            OverallImpression = "A well-prepared, thoughtful answer.",
+            NextFocus = "Practice explaining a real migration."
+        };
+
         evaluatorMock
             .Setup(x => x.EvaluateAsync(session, questions, answers, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new EvaluationResultDto
-            {
-                OverallScore = 82m,
-                Feedback = "Good structure and relevant examples."
-            });
+            .ReturnsAsync(evaluation);
 
         repositoryMock
             .Setup(x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()))
@@ -217,12 +229,20 @@ public class CompleteSessionHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Result.Should().NotBeNull();
         result.Result!.SessionId.Should().Be(sessionId);
-        result.Result.OverallScore.Should().Be(82m);
-        result.Result.Feedback.Should().Be("Good structure and relevant examples.");
+        result.Result.Observation.Should().Be(evaluation.Observation);
+        result.Result.Strengths.Should().Be(evaluation.Strengths);
+        result.Result.Communication.Should().Be(evaluation.Communication);
+        result.Result.GrowthOpportunity.Should().Be(evaluation.GrowthOpportunity);
+        result.Result.OverallImpression.Should().Be(evaluation.OverallImpression);
+        result.Result.NextFocus.Should().Be(evaluation.NextFocus);
 
         session.Status.Should().Be(InterviewSessionStatus.Completed);
-        session.OverallScore.Should().Be(82m);
-        session.Feedback.Should().Be("Good structure and relevant examples.");
+        session.Observation.Should().Be(evaluation.Observation);
+        session.Strengths.Should().Be(evaluation.Strengths);
+        session.Communication.Should().Be(evaluation.Communication);
+        session.GrowthOpportunity.Should().Be(evaluation.GrowthOpportunity);
+        session.OverallImpression.Should().Be(evaluation.OverallImpression);
+        session.NextFocus.Should().Be(evaluation.NextFocus);
         session.CompletedAtUtc.Should().NotBeNull();
 
         evaluatorMock.Verify(
@@ -233,8 +253,8 @@ public class CompleteSessionHandlerTests
             x => x.UpdateAsync(
                 It.Is<InterviewSession>(s =>
                     s.Status == InterviewSessionStatus.Completed &&
-                    s.OverallScore == 82m &&
-                    s.Feedback == "Good structure and relevant examples."),
+                    s.Observation == evaluation.Observation &&
+                    s.NextFocus == evaluation.NextFocus),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

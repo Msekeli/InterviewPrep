@@ -42,7 +42,12 @@ public class CreateSessionHandlerTests
         result.TargetLevel.Should().Be(InterviewLevel.Intermediate);
         result.Status.Should().Be(InterviewSessionStatus.Draft);
         result.CreatedAtUtc.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-        result.Feedback.Should().BeEmpty();
+        result.Observation.Should().BeEmpty();
+        result.Strengths.Should().BeEmpty();
+        result.Communication.Should().BeEmpty();
+        result.GrowthOpportunity.Should().BeEmpty();
+        result.OverallImpression.Should().BeEmpty();
+        result.NextFocus.Should().BeEmpty();
 
         repositoryMock.Verify(
             x => x.AddAsync(It.Is<InterviewSession>(s =>

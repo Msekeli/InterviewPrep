@@ -26,9 +26,7 @@ public class GetSessionByIdHandlerTests
             TargetLevel = InterviewLevel.Intermediate,
             Status = InterviewSessionStatus.InProgress,
             CreatedAtUtc = DateTime.UtcNow.AddHours(-1),
-            CompletedAtUtc = null,
-            OverallScore = null,
-            Feedback = string.Empty
+            CompletedAtUtc = null
         };
 
         repositoryMock
@@ -50,8 +48,8 @@ public class GetSessionByIdHandlerTests
         result.Status.Should().Be(session.Status);
         result.CreatedAtUtc.Should().Be(session.CreatedAtUtc);
         result.CompletedAtUtc.Should().Be(session.CompletedAtUtc);
-        result.OverallScore.Should().Be(session.OverallScore);
-        result.Feedback.Should().Be(session.Feedback);
+        result.Observation.Should().Be(session.Observation);
+        result.NextFocus.Should().Be(session.NextFocus);
 
         repositoryMock.Verify(
             x => x.GetByIdAsync(sessionId, It.IsAny<CancellationToken>()),

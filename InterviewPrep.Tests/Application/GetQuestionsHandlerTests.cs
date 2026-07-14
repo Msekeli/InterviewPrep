@@ -45,8 +45,7 @@ public class GetQuestionsHandlerTests
             CompanyText = "Company",
             TargetLevel = InterviewLevel.Junior,
             Status = InterviewSessionStatus.Draft,
-            CreatedAtUtc = DateTime.UtcNow,
-            Feedback = string.Empty
+            CreatedAtUtc = DateTime.UtcNow
         };
 
         var questions = new List<InterviewQuestion>
