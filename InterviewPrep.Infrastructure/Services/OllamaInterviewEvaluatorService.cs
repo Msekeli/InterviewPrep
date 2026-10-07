@@ -1,6 +1,5 @@
+using System.Net.Http.Json;
 using System.Text.Json;
-using Google.GenAI;
-using Google.GenAI.Types;
 using InterviewPrep.Application.DTOs;
 using InterviewPrep.Application.Interfaces;
 using InterviewPrep.Domain.Entities;
@@ -8,17 +7,19 @@ using Microsoft.Extensions.Configuration;
 
 namespace InterviewPrep.Infrastructure.Services;
 
-public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
+public class OllamaInterviewEvaluatorService : IInterviewEvaluatorService
 {
-    private readonly Client _client;
+    private readonly HttpClient _httpClient;
     private readonly string _model;
+    private readonly string _baseUrl;
 
-    public GeminiInterviewEvaluatorService(
-        Client client,
+    public OllamaInterviewEvaluatorService(
+        HttpClient httpClient,
         IConfiguration configuration)
     {
-        _client = client;
-        _model = configuration["Gemini:Model"] ?? "gemini-flash-latest";
+        _httpClient = httpClient;
+        _model = configuration["Ollama:Model"] ?? "llama3.2";
+        _baseUrl = configuration["Ollama:BaseUrl"] ?? "http://localhost:11434";
     }
 
     public async Task<EvaluationResultDto> EvaluateAsync(
@@ -97,31 +98,33 @@ public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
             Every field must contain a plain text string.
             """;
 
-        var response = await _client.Models.GenerateContentAsync(
-            model: _model,
-            contents: prompt,
-            config: new GenerateContentConfig
-            {
-                ResponseMimeType = "application/json"
-            },
+        var request = new
+        {
+            model = _model,
+            prompt,
+            stream = false,
+            format = "json"
+        };
+
+        using var response = await _httpClient.PostAsJsonAsync(
+            $"{_baseUrl.TrimEnd('/')}/api/generate",
+            request,
+            cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<OllamaResponse>(
             cancellationToken: cancellationToken);
 
-        var text = response.Candidates?
-            .FirstOrDefault()?
-            .Content?
-            .Parts?
-            .FirstOrDefault()?
-            .Text;
-
-        if (string.IsNullOrWhiteSpace(text))
+        if (result is null || string.IsNullOrWhiteSpace(result.Response))
         {
             throw new InvalidOperationException(
-                "Gemini returned an empty evaluation.");
+                "Ollama returned an empty evaluation.");
         }
 
         var evaluation =
             JsonSerializer.Deserialize<EvaluationResultDto>(
-                text,
+                result.Response,
                 new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
@@ -130,9 +133,14 @@ public class GeminiInterviewEvaluatorService : IInterviewEvaluatorService
         if (evaluation is null)
         {
             throw new InvalidOperationException(
-                "Gemini did not return a valid interview evaluation.");
+                "Ollama did not return a valid interview evaluation.");
         }
 
         return evaluation;
+    }
+
+    private sealed class OllamaResponse
+    {
+        public string Response { get; set; } = string.Empty;
     }
 }

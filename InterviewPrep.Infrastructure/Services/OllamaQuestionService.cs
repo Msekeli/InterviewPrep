@@ -1,6 +1,5 @@
+using System.Net.Http.Json;
 using System.Text.Json;
-using Google.GenAI;
-using Google.GenAI.Types;
 using InterviewPrep.Application.Interfaces;
 using InterviewPrep.Domain.Entities;
 using InterviewPrep.Domain.Enums;
@@ -8,17 +7,19 @@ using Microsoft.Extensions.Configuration;
 
 namespace InterviewPrep.Infrastructure.Services;
 
-public class GeminiQuestionService : IQuestionService
+public class OllamaQuestionService : IQuestionService
 {
-    private readonly Client _client;
+    private readonly HttpClient _httpClient;
     private readonly string _model;
+    private readonly string _baseUrl;
 
-    public GeminiQuestionService(
-        Client client,
+    public OllamaQuestionService(
+        HttpClient httpClient,
         IConfiguration configuration)
     {
-        _client = client;
-        _model = configuration["Gemini:Model"] ?? "gemini-2.5-flash";
+        _httpClient = httpClient;
+        _model = configuration["Ollama:Model"] ?? "llama3.2";
+        _baseUrl = configuration["Ollama:BaseUrl"] ?? "http://localhost:11434";
     }
 
     public async Task<IReadOnlyList<InterviewQuestion>> GenerateQuestionsAsync(
@@ -54,34 +55,32 @@ public class GeminiQuestionService : IQuestionService
             - Text
             """;
 
-        var response = await _client.Models.GenerateContentAsync(
-            model: _model,
-            contents: prompt,
-            config: new GenerateContentConfig
-            {
-                ResponseMimeType = "application/json",
-                HttpOptions = new HttpOptions
-                {
-                    Timeout = 30000
-                }
-            },
+        var request = new
+        {
+            model = _model,
+            prompt,
+            stream = false,
+            format = "json"
+        };
+
+        using var response = await _httpClient.PostAsJsonAsync(
+            $"{_baseUrl.TrimEnd('/')}/api/generate",
+            request,
+            cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<OllamaResponse>(
             cancellationToken: cancellationToken);
 
-        var text = response.Candidates?
-            .FirstOrDefault()?
-            .Content?
-            .Parts?
-            .FirstOrDefault()?
-            .Text;
-
-        if (string.IsNullOrWhiteSpace(text))
+        if (result is null || string.IsNullOrWhiteSpace(result.Response))
         {
             throw new InvalidOperationException(
-                "Gemini returned an empty response.");
+                "Ollama returned an empty response.");
         }
 
-        var generated = JsonSerializer.Deserialize<List<GeminiQuestion>>(
-            text,
+        var generated = JsonSerializer.Deserialize<List<OllamaQuestion>>(
+            result.Response,
             new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -90,10 +89,11 @@ public class GeminiQuestionService : IQuestionService
         if (generated is null || generated.Count == 0)
         {
             throw new InvalidOperationException(
-                "Gemini did not return valid interview questions.");
+                "Ollama did not return valid interview questions.");
         }
 
         return generated
+            .Take(5)
             .Select((question, index) =>
                 new InterviewQuestion(
                     session.Id,
@@ -113,7 +113,12 @@ public class GeminiQuestionService : IQuestionService
             : QuestionCategory.Technical;
     }
 
-    private sealed class GeminiQuestion
+    private sealed class OllamaResponse
+    {
+        public string Response { get; set; } = string.Empty;
+    }
+
+    private sealed class OllamaQuestion
     {
         public string Category { get; set; } = string.Empty;
 
