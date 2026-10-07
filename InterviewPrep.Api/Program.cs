@@ -4,8 +4,8 @@ using InterviewPrep.Application.Features.Results;
 using InterviewPrep.Application.Features.Sessions;
 using InterviewPrep.Application.Interfaces;
 using InterviewPrep.Infrastructure.Persistence;
-using InterviewPrep.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using InterviewPrep.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,10 +52,7 @@ else
         Directory.CreateDirectory(directory);
     }
 }
-// Swap these for a real AI-backed IQuestionService / IInterviewEvaluatorService
-// implementation when ready to use a live provider.
-builder.Services.AddScoped<IQuestionService, MockQuestionService>();
-builder.Services.AddScoped<IInterviewEvaluatorService, MockInterviewEvaluatorService>();
+builder.Services.AddGeminiServices(builder.Configuration);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite($"Data Source={dbPath}", b => b.MigrationsAssembly("InterviewPrep.Infrastructure")));
