@@ -8,7 +8,7 @@
   border-radius: 16px;
 }
 .highlight-surface {
-  background: var(--surface-strong);
+  background: var(--highlight-bg);
   border: 1px solid var(--highlight-border);
   border-radius: 16px;
 }
@@ -18,19 +18,20 @@
 }
 
 .btn {
-  padding: 10px 16px;
+  padding: 12px 20px;
+  min-height: 44px;
   border-radius: 12px;
-  font-weight: 500;
+  font-weight: 700;
   transition: all 0.2s ease;
   cursor: pointer;
 }
-
-.btn-primary {
+.btn-primary,
+.btn-accent {
   background: var(--green-primary);
-  color: #f3f3ff;
+  color: var(--on-accent);
 }
-
-.btn-primary:hover {
+.btn-primary:hover,
+.btn-accent:hover {
   box-shadow: var(--glow-green);
   transform: translateY(-1px);
 }
@@ -40,17 +41,11 @@
   border: 1px solid var(--border-soft);
   color: var(--text-primary);
 }
-
 .btn-secondary:hover {
-  background: rgba(84, 87, 214, 0.08);
+  background: var(--highlight-bg);
 }
 
-.btn-accent {
-  background: linear-gradient(135deg, var(--yellow-accent), var(--yellow-soft));
-  color: #4a2410;
-}
-
-.btn-accent:hover {
-  box-shadow: var(--glow-yellow);
-  transform: translateY(-1px);
+.btn:focus-visible {
+  outline: 2px solid var(--green-primary);
+  outline-offset: 2px;
 }

@@ -1,46 +1,46 @@
 :root {
-  --bg: #f6f5fb;
+  --bg: #f4f7fb;
   --surface: #ffffff;
-  --surface-strong: #eceafc;
+  --surface-strong: #e8eef7;
+  --text-primary: #0f172a;
+  --text-muted: #5a6780;
+  --border-soft: rgba(15, 23, 42, 0.12);
 
-  --text-primary: #201f3d;
-  --text-muted: #6a6a8f;
+  --green-primary: #0f766e;
+  --green-soft: #14b8a6;
+  --on-accent: #ffffff;
+  --yellow-accent: #b45309;
+  --yellow-soft: #f59e0b;
 
-  --border-soft: rgba(76, 79, 173, 0.14);
+  --glow-green: 0 0 18px rgba(15, 118, 110, 0.25);
+  --glow-yellow: 0 0 16px rgba(180, 83, 9, 0.25);
+  --highlight-bg: rgba(15, 118, 110, 0.07);
+  --highlight-border: rgba(15, 118, 110, 0.3);
 
-  --green-primary: #5457d6;
-  --green-soft: #7b7ee0;
-
-  --yellow-accent: #ff8a65;
-  --yellow-soft: #ffc26b;
-
-  --glow-green: 0 0 18px rgba(84, 87, 214, 0.25);
-  --glow-yellow: 0 0 16px rgba(255, 138, 101, 0.35);
-
-  --highlight-bg: rgba(255, 138, 101, 0.08);
-  --highlight-border: rgba(255, 138, 101, 0.25);
-
-  --font-display: "Iowan Old Style", "Palatino Linotype", Georgia, ui-serif, serif;
+  --font-display: var(--font-manrope), system-ui, sans-serif;
+  --font-body: var(--font-manrope), system-ui, sans-serif;
 }
+
 .dark {
-  --bg: #14132b;
-  --surface: #1c1b3a;
-  --surface-strong: #262552;
+  --bg: #0a0e16;
+  --surface: #111827;
+  --surface-strong: #162033;
+  --text-primary: #eaf0fa;
+  --text-muted: #93a0b8;
+  --border-soft: #232d45;
 
-  --text-primary: #f1f0fb;
-  --text-muted: #a6a6d6;
+  --green-primary: #5eead4;
+  --green-soft: #8ff0e0;
+  --on-accent: #04201c;
+  --yellow-accent: #f5b971;
+  --yellow-soft: #fbd38d;
 
-  --border-soft: rgba(167, 168, 239, 0.2);
+  --glow-green: 0 0 28px rgba(94, 234, 212, 0.35);
+  --glow-yellow: 0 0 22px rgba(245, 185, 113, 0.35);
+  --highlight-bg: rgba(94, 234, 212, 0.1);
+  --highlight-border: rgba(94, 234, 212, 0.4);
+}
 
-  --green-primary: #7d80e6;
-  --green-soft: #9a9cee;
-
-  --yellow-accent: #ff9770;
-  --yellow-soft: #ffcf80;
-
-  --glow-green: 0 0 28px rgba(125, 128, 230, 0.4);
-  --glow-yellow: 0 0 22px rgba(255, 151, 112, 0.4);
-
-  --highlight-bg: rgba(255, 151, 112, 0.14);
-  --highlight-border: rgba(255, 151, 112, 0.4);
+body {
+  font-family: var(--font-body);
 }
